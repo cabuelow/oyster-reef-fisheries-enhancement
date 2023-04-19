@@ -3,7 +3,6 @@
 
 # set up some initial parameters (all are spp specific)
 # TODO: what is t0?
-# something wrong
 
 dpost <- 50 # juveniles per hectare post restoration
 dpre <- 30 # juveniles per hectare pre restoration
@@ -38,7 +37,7 @@ mod_enhance <- function(spp, dpost, dpre, m, t_max, t_0, t_harv, l_asym, Ks, a, 
   }
   for(i in t_harv:years){
   df[i,7] <- df[t_harv, 'weight'] + (sum(df[t_harv:t_max, 'weight_i'], na.rm = T))*df[i,3]*area_restor
-  df[i,8] <- if(i>t_harv){df[i-1,7]+df[i,7]}else(df[i,7]) # TODO: double check this is right
+  df[i,8] <- if(i>t_harv){df[i-1,8]+df[i,7]}else(df[i,7]) # TODO: double check this is right
   }
   return(df)
 }
@@ -52,5 +51,5 @@ enhancement <- mod_enhance(dat$species, dat$dpost, dat$dpre, dat$m, dat$t_max, d
 # have a look 
 
 head(enhancement)
-plot(x = enhancement$year, y = enhancement$cumul_benhance) # something wrong
+plot(x = enhancement$year, y = enhancement$cumul_benhance)
 
