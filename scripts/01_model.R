@@ -3,17 +3,54 @@
 
 # set up some initial parameters (all are spp specific)
 # TODO: what is t0?
+# something wrong
 
 dpost <- 50 # juveniles per hectare post restoration
 dpre <- 30 # juveniles per hectare pre restoration
-mort <- 0.1 # mortality
+m <- 0.1 # mortality
 t_max <- 26 # maximum age
 t_0 <- 0.1 # theoretical age when length is 0
 t_harv <- 5 # age of recruitment to fishery
-leng_asym <- 20 # asymptotic size (length in cm)
+l_asym <- 20 # asymptotic size (length in cm)
 Ks <- 0.5 # Brody growth coef 
 a <- 0.1 # intercept of length-weight relationship
 b <- 0.5 # slope of length-weight relationship
 area_restor <- 20 # area restored in hectares
+years <- 50 # number of years since restoration
 
+# set up as a dataframe
+
+dat <- data.frame(species = 'Snapper', dpost = dpost, dpre = dpre,
+                 m = m, t_max = t_max, t_0 = t_0, t_harv = t_harv,
+                 l_asym = l_asym, Ks = Ks, a = a, b = b)
+
+# function to return a dataframe of densities, lengths and weights in each year
+
+mod_enhance <- function(spp, dpost, dpre, m, t_max, t_0, t_harv, l_asym, Ks, a, b, area_restor, years){
+  df <- data.frame(species = NA, year = NA, denhance = NA, length = NA, weight = NA, weight_i = NA, benhance = NA, cumul_benhance = NA)
+  for(i in 1:years){
+  df[i,1] <- spp # spp
+  df[i,2] <- i # year
+  df[i,3] <- (dpost-dpre)*exp(-m*(i-0.5)) # estimate biomass enhancement
+  df[i,4] <- l_asym*(1-exp(-Ks*(i-t_0))) # estimate length
+  df[i,5] <- a*df[i,4]^b # convert to weight
+  df[i,6] <- if(i>1){df[i,5]-df[i-1,5]}else(0) # TODO: double check this is right
+  }
+  for(i in t_harv:years){
+  df[i,7] <- df[t_harv, 'weight'] + (sum(df[t_harv:t_max, 'weight_i'], na.rm = T))*df[i,3]*area_restor
+  df[i,8] <- if(i>t_harv){df[i-1,7]+df[i,7]}else(df[i,7]) # TODO: double check this is right
+  }
+  return(df)
+}
+
+# run the model
+
+enhancement <- mod_enhance(dat$species, dat$dpost, dat$dpre, dat$m, dat$t_max, dat$t_0, 
+           dat$t_harv, dat$l_asym, dat$Ks, dat$a, dat$b, 
+           area_restor = area_restor, years = years)
+
+# have a look 
+
+head(enhancement)
+plot(x = enhancement$year, y = enhancement$cumul_benhance) # something wrong
 
