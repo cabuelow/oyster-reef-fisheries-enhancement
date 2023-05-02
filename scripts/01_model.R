@@ -53,3 +53,4 @@ enhancement <- mod_enhance(dat$species, dat$dpost, dat$dpre, dat$m, dat$t_max, d
 head(enhancement)
 plot(x = enhancement$year, y = enhancement$cumul_benhance)
 
+#TODO - will need an estimate of variance around cumul_benhance
