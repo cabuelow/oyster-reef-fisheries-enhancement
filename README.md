@@ -5,6 +5,10 @@ This repository provides code to estimate fisheries enhancement from restored oy
 ### TODO
 
 -   [ ] Check database is good, adapt code so can run efficiently for multiple species, confirm with Jas any changes needed
+  - t_0 and t_harv missing
+  - tO- potentially can estimate using berlantony growth equation
+  - t_harv can potentially estimate from size at recruitment, again using berlantony growth equation
+
 -   [ ] Add standard errors or a measure of confidence around each cumulative enhancement value
 -   [ ] Solution for how to represent this error/confidence once we add up the total enhancement value across all species
 
