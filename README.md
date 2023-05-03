@@ -4,13 +4,21 @@ This repository provides code to estimate fisheries enhancement from restored oy
 
 ### TODO
 
--   [X] Check database is good, adapt code so can run efficiently for multiple species, confirm with Jas any changes needed
-  - t_0 and t_harv missing
-  - tO- potentially can estimate using berlantony growth equation
-  - t_harv can potentially estimate from size at recruitment, again using berlantony growth equation
+-   [x] Check database is good, adapt code so can run efficiently for multiple species, confirm with Jas any changes needed
+
+-   t_0 and t_harv missing
+
+-   tO- potentially can estimate using berlantony growth equation
+
+-   t_harv can potentially estimate from size at recruitment, again using berlantony growth equation
 
 -   [ ] Add standard errors or a measure of confidence around each cumulative enhancement value
+  - zu Ermgassen 2016 constructs uncertainty intervals using the mean and std. error of juvenile densities. assumes all other LH paramaters are invariant (b/c don't have data on how they vary..perhaps we can do better). But can do this for all of the parameter estimates
+
 -   [ ] Solution for how to represent this error/confidence once we add up the total enhancement value across all species
+  - can just sum variances across species once have estimated using simulation for each one (step above)
+  
+  - TODO: read Thorson et al. 2020, and zu ermgassen 2021
 
 ### Notes
 
