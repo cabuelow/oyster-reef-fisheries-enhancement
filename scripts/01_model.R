@@ -2,11 +2,10 @@
 # CABuelow
 
 # set up some initial parameters (all are spp specific)
-# TODO: what is t0?
 
 dpost <- 50 # juveniles per hectare post restoration
 dpre <- 30 # juveniles per hectare pre restoration
-m <- 0.1 # mortality
+m <- 0.1 # annual mortality rate
 t_max <- 26 # maximum age
 t_0 <- 0.1 # theoretical age when length is 0
 t_harv <- 5 # age of recruitment to fishery
@@ -22,6 +21,7 @@ years <- 50 # number of years since restoration
 dat <- data.frame(species = 'Snapper', dpost = dpost, dpre = dpre,
                  m = m, t_max = t_max, t_0 = t_0, t_harv = t_harv,
                  l_asym = l_asym, Ks = Ks, a = a, b = b)
+write.csv(dat, 'data/template-df.csv', row.names = F)
 
 # function to return a dataframe of densities, lengths and weights in each year
 
@@ -33,11 +33,11 @@ mod_enhance <- function(spp, dpost, dpre, m, t_max, t_0, t_harv, l_asym, Ks, a, 
   df[i,3] <- (dpost-dpre)*exp(-m*(i-0.5)) # estimate biomass enhancement
   df[i,4] <- l_asym*(1-exp(-Ks*(i-t_0))) # estimate length
   df[i,5] <- a*df[i,4]^b # convert to weight
-  df[i,6] <- if(i>1){df[i,5]-df[i-1,5]}else(0) # TODO: double check this is right
+  df[i,6] <- if(i>1){df[i,5]-df[i-1,5]}else(0)
   }
   for(i in t_harv:years){
   df[i,7] <- df[t_harv, 'weight'] + (sum(df[t_harv:t_max, 'weight_i'], na.rm = T))*df[i,3]*area_restor
-  df[i,8] <- if(i>t_harv){df[i-1,8]+df[i,7]}else(df[i,7]) # TODO: double check this is right
+  df[i,8] <- if(i>t_harv){df[i-1,8]+df[i,7]}else(df[i,7]) 
   }
   return(df)
 }
