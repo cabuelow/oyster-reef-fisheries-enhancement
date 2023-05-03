@@ -19,6 +19,7 @@ This repository provides code to estimate fisheries enhancement from restored oy
   - can just sum variances across species once have estimated using simulation for each one (step above)
   
   - TODO: read Thorson et al. 2020, and zu ermgassen 2021
+  zu ermgassesn (2021) factors in the std. error of reported densities as opposed to giving them all equal weight, and by giving each bay or estuary equal weighting when deriving the Gulf of Mexico wide values
 
 ### Notes
 
