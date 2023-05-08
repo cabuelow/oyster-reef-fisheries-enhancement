@@ -8,7 +8,7 @@ This repository provides code to estimate fisheries enhancement from restored oy
 
 -   t_0 and t_harv missing
 
--   tO- potentially can estimate using berlantony growth equation
+-   tO- potentially can estimate using von Bert growth equation
 
 -   t_harv can potentially estimate from size at recruitment, again using berlantony growth equation
 
@@ -20,6 +20,8 @@ This repository provides code to estimate fisheries enhancement from restored oy
   
   - TODO: read Thorson et al. 2020, and zu ermgassen 2021
   zu ermgassesn (2021) factors in the std. error of reported densities as opposed to giving them all equal weight, and by giving each bay or estuary equal weighting when deriving the Gulf of Mexico wide values
+  
+  - [ ] von Bert growth eqn may not be appropriate for all species, in which case switch between that and a different one, e.g., Schnute
 
 ### Notes
 
