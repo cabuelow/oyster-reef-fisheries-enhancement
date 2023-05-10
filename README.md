@@ -21,16 +21,10 @@ This repository provides code to estimate fisheries enhancement from restored oy
   - TODO: read Thorson et al. 2020, and zu ermgassen 2021
   zu ermgassesn (2021) factors in the std. error of reported densities as opposed to giving them all equal weight, and by giving each bay or estuary equal weighting when deriving the Gulf of Mexico wide values
   
-  - [ ] von Bert growth eqn may not be appropriate for all species, in which case switch between that and a different one, e.g., Schnute
+  - [x] von Bert growth eqn may not be appropriate for all species, in which case switch between that and a different one, e.g., Schnute. Will just use von Bert for now (see note from DH below).
 
-### Notes
+### Notes from DH
 
--   [ ] Some of the lifehistory values have been hard to validate (each resource we find gives different values for the same population) or obtain in consistent formats (some give ranges, some are total length (nose to tail tip) while others are carapace length, or disk length (for rays).
+-   keep a close eye on the maximum length (L infinity) in any fitted growth curve. If this is way off then you may get some non-trivial overestimates. Rod or any fisheries people in the lab should be able to tell whether the estimate is reasonable.
 
--   [ ] this is a work in progress and we have some contingency (eg. getting age/length at settlement (called recruitment), one year, maturity, and harvest, as they are all often referred to as 'recruitment' depending on the nature of the resource) in place for later discussions on choosing the best metric
-
--   [x] What is 'theoretical age when length is 0'? - This is a scaling parameter to standardise growth curves of different fish species and directly compare them. Can estimate using the von Bertalanffy growth model if you have length at various points in time, growth rate, and the asymptotic (i.e., maximum) length of a species.
-
-`L(t) = L_inf * (1 - exp(-K*(t - t_0)))`
-
-L_inf = asymptotic length; K = growth rate; t_0 = theoretical age at length 0
+- VB curves fit pretty well for most species and are still by far the most common in the literature. If a particular study found a better fitting function, then I’d use that, but I mostly see this as something to be aware of. I may have overstated the importance of this a little in our conversation. An encouraging thing about our analysis is that we’re most interested in fish from the recruitment age/size through to a bit less than their maximum age/size (few ever reach it because of fishing mortality at earlier ages/sizes). It also happens that most data used to fit growth curves is from fish within this range too, so the region where we want the curve to fit well is usually where it has the most data.
