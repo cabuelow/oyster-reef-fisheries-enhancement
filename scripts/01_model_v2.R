@@ -1,55 +1,52 @@
-# model biomass enhanced by restored reefs based on juvenile abundance
-# CABuelow
+# model biomass enhanced by restored reefs based on juvenile abundance, 
+# incorporating fish density uncertainty, modelled as a truncated normal distribution
 
-# set up some initial parameters (all are spp specific)
+library(msm)
+library(tidyverse)
+source('scripts/functions/helpers.R')
+set.seed(123)
 
-dens <- 50 # juvenile density enhancement (number of individuals per hectare)
-std_err <- 2 # density enhancement standard error
-m <- 0.1 # annual mortality rate
-t_max <- 26 # maximum age
-t_0 <- 0.1 # theoretical age when length is 0
-t_harv <- 5 # age of recruitment to fishery
-l_asym <- 20 # asymptotic size (length in cm)
-Ks <- 0.5 # Brody growth coef 
-a <- 0.1 # intercept of length-weight relationship
-b <- 0.5 # slope of length-weight relationship
-area_restor <- 20 # area restored in hectares
-years <- 50 # number of years since restoration
+# load data
 
-# set up as a dataframe
+dat <- read.csv('data/fish-dat.csv')
+area <- 1 # area restored in hectares
+num_years <- 50 # number of years since restoration
 
-dat <- data.frame(species = 'Snapper', dpost = dpost, dpre = dpre,
-                 m = m, t_max = t_max, t_0 = t_0, t_harv = t_harv,
-                 l_asym = l_asym, Ks = Ks, a = a, b = b)
+# simulate fish densities from a normal distribution truncated  at 0 (n = 100000)
+# representing sampling distribution of density differences (mean +- std. error)
+# apply biomass enhancement model to the density distribution to estimate enhancement uncertainty
 
-# function to return a dataframe of densities, lengths and weights in each year
+n <- 1000 # bump up down the road
+spp <- unique(dat$species)
+tmp <- list() # store results
 
-mod_enhance <- function(spp, dpost, dpre, m, t_max, t_0, t_harv, l_asym, Ks, a, b, area_restor, years){
-  df <- data.frame(species = NA, year = NA, denhance = NA, length = NA, weight = NA, weight_i = NA, benhance = NA, cumul_benhance = NA)
-  for(i in 1:years){
-  df[i,1] <- spp # spp
-  df[i,2] <- i # year
-  df[i,3] <- dens*exp(-m*(i-0.5)) # estimate juvenile density surviving to year i
-  df[i,4] <- l_asym*(1-exp(-Ks*(i-t_0))) # estimate length using von bert eqn
-  df[i,5] <- a*df[i,4]^b # convert length to weight
-  df[i,6] <- if(i>1){df[i,5]-df[i-1,5]}else(0) # get the incremental increase in weight for each time interval (i.e. year)
+for(i in seq_along(spp)){
+  ind <- dat %>% filter(species == spp[i])
+  if(nrow(ind) > 1){
+    indM <- ind %>% filter(male_female == 'M')
+    dens_distM <- sim_truncnorm(n, indM$d_diff, indM$d_diff_se[1], lower = 0, upper = Inf)
+    if(mean(dens_distM) != indM$d_diff){print(paste0('warning: Male densities are different ', mean(dens_distM) != indM$d_diff))}
+    if(sd(dens_distM) != indM$d_diff_se){print(paste0('warning: Male std. errs are different by ', sd(dens_distM) - indM$d_diff_se))}
+    enhanM <- lapply(dens_distM/2, mod_enhance, spp = indM$species, mf = indM$male_female, m = indM$m, t_max = indM$t_max, t_0 = indM$t_0, 
+                          t_harv = indM$t_harv, l_asym = indM$l_asym, Ks = indM$Ks, a = indM$a, b = indM$b, area_restor = area, years = num_years)
+    indF <- ind %>% filter(male_female == 'F')
+    dens_distF <- sim_truncnorm(n, indF$d_diff, indF$d_diff_se, lower = 0, upper = Inf)
+    if(mean(dens_distF) != indF$d_diff){print(paste0('warning: Female densities are different ', mean(dens_distF) != indF$d_diff))}
+    if(sd(dens_distF) != indF$d_diff_se){print(paste0('warning: Female std. errs are different by ', sd(dens_distF) - indF$d_diff_se))}
+    enhanF <- lapply(dens_distF/2, mod_enhance, spp = indF$species, mf = indF$male_female, m = indF$m, t_max = indF$t_max, t_0 = indF$t_0, 
+                     t_harv = indF$t_harv, l_asym = indF$l_asym, Ks = indF$Ks, a = indF$a, b = indF$b, area_restor = area, years = num_years)
+    tmp[[i]] <- rbind(do.call(rbind, enhanM), do.call(rbind, enhanF))
+  }else{
+    dens_dist <- sim_truncnorm(n, ind$d_diff, ind$d_diff_se, lower = 0, upper = Inf)
+    if(mean(dens_dist) != ind$d_diff){print(paste0('warning: densities are different ', mean(dens_dist) != ind$d_diff))}
+    if(sd(dens_dist) != ind$d_diff_se){print(paste0('warning: std. errs are different by ', sd(dens_dist) - ind$d_diff_se))}
+    enhan <- lapply(dens_dist, mod_enhance, spp = ind$species, mf = ind$male_female, m = ind$m, t_max = ind$t_max, t_0 = ind$t_0, 
+                     t_harv = ind$t_harv, l_asym = ind$l_asym, Ks = ind$Ks, a = ind$a, b = ind$b, area_restor = area, years = num_years)
+    tmp[[i]] <- do.call(rbind, enhan)
   }
-  for(i in t_harv:years){
-  df[i,7] <- df[t_harv, 'weight'] + (sum(df[t_harv:t_max, 'weight_i'], na.rm = T))*df[i,3]*area_restor
-  df[i,8] <- if(i>t_harv){df[i-1,8]+df[i,7]}else(df[i,7]) 
-  }
-  return(df)
 }
 
-# run the model
+results <- do.call(rbind, tmp)
+write.csv(results, 'biomass-enhancement.csv', row.names = F)
 
-enhancement <- mod_enhance(dat$species, dat$dpost, dat$dpre, dat$m, dat$t_max, dat$t_0, 
-           dat$t_harv, dat$l_asym, dat$Ks, dat$a, dat$b, 
-           area_restor = area_restor, years = years)
 
-# have a look 
-
-head(enhancement)
-plot(x = enhancement$year, y = enhancement$cumul_benhance)
-
-#TODO - will need an estimate of variance around cumul_benhance
