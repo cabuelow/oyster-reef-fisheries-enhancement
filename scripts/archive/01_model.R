@@ -3,18 +3,18 @@
 
 # set up some initial parameters (all are spp specific)
 
-dpost <- 50 # juveniles per hectare post restoration
-dpre <- 30 # juveniles per hectare pre restoration
-m <- 0.1 # annual mortality rate
-t_max <- 26 # maximum age
-t_0 <- 0.1 # theoretical age when length is 0
-t_harv <- 5 # age of recruitment to fishery
-l_asym <- 20 # asymptotic size (length in cm)
-Ks <- 0.5 # Brody growth coef 
-a <- 0.1 # intercept of length-weight relationship
-b <- 0.5 # slope of length-weight relationship
-area_restor <- 20 # area restored in hectares
-years <- 50 # number of years since restoration
+dpost <- 0.415 # juveniles per hectare post restoration
+dpre <- 0 # juveniles per hectare pre restoration
+m <- 0.78 # annual mortality rate
+t_max <- 7 # maximum age
+t_0 <- -1.1 # theoretical age when length is 0
+t_harv <- 1 # age of recruitment to fishery
+l_asym <- 22 # asymptotic size (length in cm)
+Ks <- 0.33 # Brody growth coef 
+a <- 0.0316 # intercept of length-weight relationship
+b <- 3.03 # slope of length-weight relationship
+area_restor <- 1 # area restored in hectares
+years <- 25 # number of years since restoration
 
 # set up as a dataframe
 
@@ -54,3 +54,4 @@ head(enhancement)
 plot(x = enhancement$year, y = enhancement$cumul_benhance)
 
 #TODO - will need an estimate of variance around cumul_benhance
+
