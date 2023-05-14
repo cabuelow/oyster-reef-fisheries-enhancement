@@ -15,7 +15,7 @@ This repository provides code to estimate fisheries enhancement from restored oy
 -   [ ] Add standard errors or a measure of confidence around each cumulative enhancement value
   - zu Ermgassen 2016 constructs uncertainty intervals using the mean and std. error of juvenile densities. assumes all other LH paramaters are invariant (b/c don't have data on how they vary..perhaps we can do better). But can do this for all of the parameter estimates. Or do sensitivity test if just have a few.
 
--   [X] Solution for how to represent this error/confidence once we add up the total enhancement value across all species
+-   [] Solution for how to represent this error/confidence once we add up the total enhancement value across all species
   - can just sum variances across species once have estimated using simulation for each one (step above)
   - consider: need to weight by biomass??
   

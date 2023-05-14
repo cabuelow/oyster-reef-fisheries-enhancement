@@ -1,5 +1,6 @@
 # model biomass enhanced by restored reefs based on juvenile abundance, 
 # incorporating fish density uncertainty, modelled as a truncated normal distribution
+#TODO: not working!!
 
 library(msm)
 library(tidyverse)
@@ -10,7 +11,7 @@ set.seed(123)
 
 dat <- read.csv('data/fish-dat.csv')
 area <- 1 # area restored in hectares
-num_years <- 50 # number of years since restoration
+num_years <- 100 # number of years since restoration
 
 # simulate fish densities from a normal distribution truncated  at 0 (n = 100000)
 # representing sampling distribution of density differences (mean +- std. error)
@@ -47,6 +48,6 @@ for(i in seq_along(spp)){
 }
 
 results <- do.call(rbind, tmp)
-write.csv(results, 'biomass-enhancement.csv', row.names = F)
+write.csv(results, 'outputs/biomass-enhancement.csv', row.names = F)
 
 

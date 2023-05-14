@@ -21,7 +21,7 @@ years <- 50 # number of years since restoration
 dat <- data.frame(species = 'Snapper', dpost = dpost, dpre = dpre,
                  m = m, t_max = t_max, t_0 = t_0, t_harv = t_harv,
                  l_asym = l_asym, Ks = Ks, a = a, b = b)
-write.csv(dat, 'data/template-df.csv', row.names = F)
+#write.csv(dat, 'data/template-df.csv', row.names = F)
 
 # function to return a dataframe of densities, lengths and weights in each year
 
