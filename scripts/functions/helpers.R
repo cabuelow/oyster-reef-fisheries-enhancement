@@ -19,12 +19,12 @@ mod_enhance <- function(dens, spp, mf, m, t_max, t_0, t_harv, l_asym, Ks, a, b, 
     df[i,3] <- i # year
     df[i,4] <- dens*exp(-m*(i-0.5)) # estimate juvenile density surviving to year i
     df[i,5] <- l_asym*(1-exp(-Ks*(i-t_0))) # estimate length using von bert eqn
-    df[i,6] <- a*df[i,4]^b # convert length to weight
-    df[i,7] <- if(i>1){df[i,5]-df[i-1,5]}else(0) # get the incremental increase in weight for each time interval (i.e. year)
+    df[i,6] <- a*df[i,5]^b # convert length to weight
+    df[i,7] <- if(i>1){df[i,6]-df[i-1,6]}else(0) # get the incremental increase in weight for each time interval (i.e. year)
   }
   for(i in t_harv:years){
-    df[i,8] <- df[t_harv, 'weight'] + (sum(df[t_harv:t_max, 'weight_i'], na.rm = T))*df[i,3]*area_restor
-    df[i,9] <- if(i>t_harv){df[i-1,8]+df[i,7]}else(df[i,7]) 
+    df[i,8] <- df[t_harv, 'weight'] + (sum(df[t_harv:t_max, 'weight_i'], na.rm = T))*df[i,4]*area_restor
+    df[i,9] <- if(i>t_harv){df[i-1,9]+df[i,8]}else(df[i,8]) 
   }
   return(df)
 }
