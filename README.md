@@ -9,8 +9,6 @@ This repository provides code to estimate fisheries enhancement from restored oy
     - 2. simulate separately for males and females and add up enhancement at the end
     - Probably only makes a difference if we have density differences...?
     - For now dividing densities by 2 if they are the same, and modelling separately
-- [ ] Currently all species start 'enhancing' fisheries at different times (i.e., dependent on age at first harvest).
-- [ ] When try to reproduce pinfish from zu ermgassen, don't get same results, figure out why
 
 ### TODO
 
