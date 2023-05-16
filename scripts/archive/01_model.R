@@ -35,8 +35,8 @@ mod_enhance <- function(dens, spp, mf, m, t_max, t_0, t_harv, l_asym, Ks, a, b, 
     df[i,7] <- if(i<t_max)(df[i+1,6] - df[i,6])else(0) # get the incremental increase in weight for each time interval (i.e. year)
   }
   for(i in t_harv:years){
-    df[i,8] <- (df[t_harv, 'weight_g'] + (sum(df[t_harv:i, 'weight_g_i'], na.rm = T)))*df[i,4]
-    df[i,9] <- if(i==t_harv){df[i,8]}else{df[i-1,9]+df[i,8]}
+    df[i,8] <- (df[t_harv, 'weight_g'] + (sum(df[t_harv:i, 'weight_g_i'], na.rm = T)))*df[i,4] # sum up the weight at time of recruitment to fishery with any weight gains and multiply by fish density
+    df[i,9] <- if(i==t_harv){df[i,8]}else{df[i-1,9]+df[i,8]} # cumulative biomass enhancement
   }
   return(df)
 }

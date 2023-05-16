@@ -12,15 +12,14 @@ This repository provides code to estimate fisheries enhancement from restored oy
 
 ### TODO
 
-- [ ] Fix male vs. female split - seem to be way overestimating
-
-- [ ] Sensitivity analysis of key life history parameters
+- [X] Sensitivity analysis of key life history parameters
+- have done for mortality
 
 -   [X] Add standard errors or a measure of confidence around each cumulative enhancement value
   - zu Ermgassen 2016 constructs uncertainty intervals using the mean and std. error of juvenile densities. assumes all other LH paramaters are invariant (b/c don't have data on how they vary..perhaps we can do better). But can do this for all of the parameter estimates. Or do sensitivity test if just have a few.
 
 -   [X] Solution for how to represent this error/confidence once we add up the total enhancement value across all species
-  - If we assume the densities of fish are independent, can just sum variances across species once have estimated using simulation for each one (step above)
+  - If we assume the densities of fish are independent, can just sum variances across species once have estimated using simulation for each one (step above) because samples sizes are the same
   - Otherwise use covariance in density among fish and use law of total variance (covariance)
   
   - [x] von Bert growth eqn may not be appropriate for all species, in which case switch between that and a different one, e.g., Schnute. Will just use von Bert for now (see note from DH below).
