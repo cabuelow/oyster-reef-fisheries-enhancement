@@ -4,6 +4,7 @@ This repository provides code to estimate fisheries enhancement from restored oy
 
 ### To consider
 
+- [ ] Currently just calculating biomass enhancement from the year a fish recruits to fishery (i.e is harvested). Could alternatively do biomass enhancement from juvenile recruitment (i.e. age 1)
 - [ ] Where have different parameter estimates for males and females, should we:
     - 1. take an average of the life history parameters?
     - 2. simulate separately for males and females and add up enhancement at the end

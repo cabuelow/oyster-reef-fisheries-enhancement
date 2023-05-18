@@ -3,41 +3,55 @@
 library(tidyverse)
 library(patchwork)
 library(RColorBrewer)
+#TODO: fixe up plots
 
 # calculate mean, standard deviation, upper and lower quartiles of biomass enhancement for each species in each year
 
 dat <- read.csv('outputs/biomass-enhancement.csv') 
-dat[is.na(dat)] <- 0 # make all missing biomass enhancement values 0 (its just because the fish hasn't recruited yet)
 
 dat2 <- dat %>% 
   filter(m == 'm') %>% # using lit-derived mortality rate
   group_by(sim, species, year) %>% 
-  summarise(cumul_bio_enhance_g_ha = sum(cumul_bio_enhance_g_ha)) %>%  # here summing by gender 
+  summarise(gross_biomass_g_ha = sum(gross_biomass_g_ha),
+            net_biomass_g_ha = sum(net_biomass_g_ha)) %>%  # here summing by gender 
   group_by(species, year) %>% 
-  summarise(cumul_benhance_mean = mean(cumul_bio_enhance_g_ha, na.rm = T),
-            cumul_benhance_var = var(cumul_bio_enhance_g_ha, na.rm = T),
-            cumul_benhance_sd = sd(cumul_bio_enhance_g_ha, na.rm = T),
-            cumul_benhance_se = sd(cumul_bio_enhance_g_ha, na.rm = T)/sqrt(max(dat$sim)),
-            cumul_benhance_95 = (sd(cumul_bio_enhance_g_ha, na.rm = T)/sqrt(max(dat$sim)))*1.96,
-            cumul_benhance_upp = quantile(cumul_bio_enhance_g_ha, 0.75, na.rm = T),
-            cumul_benhance_low = quantile(cumul_bio_enhance_g_ha, 0.25, na.rm = T))
+  summarise(gross_biomass_g_ha_mean = mean(gross_biomass_g_ha, na.rm = T),
+            gross_biomass_g_ha_var = var(gross_biomass_g_ha, na.rm = T),
+            gross_biomass_g_ha_sd = sd(gross_biomass_g_ha, na.rm = T),
+            gross_biomass_g_ha_se = sd(gross_biomass_g_ha, na.rm = T)/sqrt(max(dat$sim)),
+            gross_biomass_g_ha_95 = (sd(gross_biomass_g_ha, na.rm = T)/sqrt(max(dat$sim)))*1.96,
+            gross_biomass_g_ha_upp = quantile(gross_biomass_g_ha, 0.75, na.rm = T),
+            gross_biomass_g_ha_low = quantile(gross_biomass_g_ha, 0.25, na.rm = T),
+            net_biomass_g_ha_mean = mean(net_biomass_g_ha, na.rm = T),
+            net_biomass_g_ha_var = var(net_biomass_g_ha, na.rm = T),
+            net_biomass_g_ha_sd = sd(net_biomass_g_ha, na.rm = T),
+            net_biomass_g_ha_se = sd(net_biomass_g_ha, na.rm = T)/sqrt(max(dat$sim)),
+            net_biomass_g_ha_95 = (sd(net_biomass_g_ha, na.rm = T)/sqrt(max(dat$sim)))*1.96,
+            net_biomass_g_ha_upp = quantile(net_biomass_g_ha, 0.75, na.rm = T),
+            net_biomass_g_ha_low = quantile(net_biomass_g_ha, 0.25, na.rm = T))
 
 # total biomass enhancement across all species
 # have same sample size for each species in each year, so don't need to weight variance or biomass esimtates by sample size
 
 a <- dat2 %>% 
   group_by(year) %>% 
-  summarise(total_behnance = sum(cumul_benhance_mean), 
-            total_sd = sqrt(sum(cumul_benhance_var))) %>% 
+  summarise(gross_enhance = sum(gross_biomass_g_ha_mean), 
+            gross_sd = sqrt(sum(gross_biomass_g_ha_var)),
+            net_enhance = sum(net_biomass_g_ha_mean), 
+            net_sd = sqrt(sum(net_biomass_g_ha_var))) %>% 
   ggplot() +
-  geom_ribbon(aes(x = year, ymin = total_behnance - total_sd, 
-                  ymax = total_behnance + total_sd), fill = "grey", alpha = 0.5) +
-  geom_line(aes(x = year, y = total_behnance)) +
+  geom_ribbon(aes(x = year, ymin = gross_enhance - gross_sd, 
+                  ymax = gross_enhance + gross_sd), fill = "grey", alpha = 0.5) +
+  geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
+                  ymax = net_enhance + net_sd), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = gross_enhance)) +
+  geom_line(aes(x = year, y = net_enhance), col = 'red') +
   ylab(bquote('Biomass enhancement (g ' ~ha^-1~year^-1*')')) +
   ggtitle('A) All species (+- SD)') +
   xlab('Year') +
   ylim(c(0,450)) +
   theme_classic()
+a
 
 # species with uncertainty
 
