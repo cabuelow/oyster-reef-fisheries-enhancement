@@ -10,6 +10,9 @@ This repository provides code to estimate fisheries enhancement from restored oy
     - 2. simulate separately for males and females and add up enhancement at the end
     - Probably only makes a difference if we have density differences...?
     - For now dividing densities by 2 if they are the same, and modelling separately
+- [ ] gross vs. net production 
+- Gross production: includes biomass gains by both living individuals and individuals that die in the intervening period
+- Net production: only considers biomass gains by individuals that survives to maximum age using incremental weight gains
 
 ### TODO
 

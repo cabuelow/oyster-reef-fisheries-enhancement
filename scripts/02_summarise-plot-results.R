@@ -71,7 +71,7 @@ b <- dat2 %>%
 
 c <- dat2 %>% 
   ggplot() +
-  geom_area(aes(x = year, y = cumul_benhance_mean, fill = factor(species)), position = 'stack') +
+  geom_area(aes(x = year, y = gross_biomass_g_ha_mean, fill = factor(species)), position = 'stack') +
   ylab('') +
   xlab('Year') +
   ggtitle('C) Cumulative individual species') +
