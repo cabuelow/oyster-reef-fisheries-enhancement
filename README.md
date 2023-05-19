@@ -11,9 +11,10 @@ This repository provides code to estimate fisheries enhancement from restored oy
     - Probably only makes a difference if we have density differences...?
     - For now dividing densities by 2 if they are the same, and modelling separately
 - [ ] gross vs. net production 
-- Gross production: includes biomass gains by both living individuals and individuals that die in the intervening period
-- Net production: only considers biomass gains by individuals that survives to maximum age using incremental weight gains
-
+  - Gross biomass enhancement: includes biomass gains by both living individuals and individuals that die in the intervening period
+  - Net biomass enhancement: only considers biomass gains by individuals that survives to maximum age using incremental weight gains
+  - We will use net biomass enhancement to be similar to Tomago case study
+  
 ### TODO
 
 - [X] Sensitivity analysis of key life history parameters
