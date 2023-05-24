@@ -4,18 +4,13 @@ This repository provides code to estimate fisheries enhancement from restored oy
 
 ### To consider
 
-- [ ] Currently just calculating biomass enhancement from the year a fish recruits to fishery (i.e is harvested). Could alternatively do biomass enhancement from juvenile recruitment (i.e. age 1)
-- [ ] Where have different parameter estimates for males and females, should we:
-    - 1. take an average of the life history parameters?
-    - 2. simulate separately for males and females and add up enhancement at the end
-    - Probably only makes a difference if we have density differences...?
-    - For now dividing densities by 2 if they are the same, and modelling separately
+- [ ] Assuming a 1:1 ratio M:F and dividing densities by 2, modelling Males and Females separately, and summing up per species at the end
 - [ ] Net biomass enhancement only calculates enhancement from incremental weight gains after the fish are recruited to the fishery (are harvestable). So doesn't double count weight already gained in previous years, considering fish that survive each year
+- [ ] Could alternatively do biomass enhancement from juvenile recruitment (i.e. age 1)
 
 ### TODO
 
 - [X] Sensitivity analysis of key life history parameters
-- have done for mortality
 
 -   [X] Add standard errors or a measure of confidence around each cumulative enhancement value
   - zu Ermgassen 2016 constructs uncertainty intervals using the mean and std. error of juvenile densities. assumes all other LH paramaters are invariant (b/c don't have data on how they vary..perhaps we can do better). But can do this for all of the parameter estimates. Or do sensitivity test if just have a few.
