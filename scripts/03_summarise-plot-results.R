@@ -13,7 +13,7 @@ dat_param <- read.csv('data/fish-dat.csv') %>%
 
 dat2 <- dat %>% 
   left_join(select(dat_param, species, harvested), by = 'species') %>% 
-  mutate(net_biomass_kg_ha = (net_biomass_g_100m2*100)/1000) %>% # convert biomass to kg/ha
+  mutate(net_biomass_kg_ha = (net_biomass_g_unit_area/100)*10) %>% # unit area is 100m2, so divide by 100 to get g/m2, then multiply by 10 to get kg/ha
   filter(m == 'm') %>% # using selected 'm' values for main results
   group_by(sim, species, harvested, site, year) %>% 
   summarise(net_biomass_kg_ha = sum(net_biomass_kg_ha)) %>%  # here summing by gender 
