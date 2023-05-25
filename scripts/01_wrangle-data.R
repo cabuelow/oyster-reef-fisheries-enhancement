@@ -30,3 +30,4 @@ dat_final <- dat_density %>%
   left_join(dat, by = 'species')
 
 write.csv(dat_final, 'data/wrangled-dat.csv', row.names = F)
+

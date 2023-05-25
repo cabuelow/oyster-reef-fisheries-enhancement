@@ -7,13 +7,17 @@ library(RColorBrewer)
 # calculate mean, standard deviation, upper and lower quartiles of biomass enhancement for each species in each year
 
 dat <- read.csv('outputs/biomass-enhancement.csv') 
+dat_param <- read.csv('data/fish-dat.csv') %>% 
+  select(species, harvested) %>% distinct() %>% 
+  mutate(harvested = recode(harvested, 'y' = 'Harvested species', 'n' = 'Non-harvested species'))
 
 dat2 <- dat %>% 
-  mutate(net_biomass_kg_ha = net_biomass_g_100m2/10) %>% # convert biomass to kg/ha
+  left_join(select(dat_param, species, harvested), by = 'species') %>% 
+  mutate(net_biomass_kg_ha = (net_biomass_g_100m2/100)*10) %>% # convert biomass to kg/ha
   filter(m == 'm') %>% # using selected 'm' values for main results
-  group_by(sim, species, site, year) %>% 
+  group_by(sim, species, harvested, site, year) %>% 
   summarise(net_biomass_kg_ha = sum(net_biomass_kg_ha)) %>%  # here summing by gender 
-  group_by(species, site, year) %>% 
+  group_by(species, harvested, site, year) %>% 
   summarise(net_biomass_kg_ha_mean = mean(net_biomass_kg_ha, na.rm = T),
             net_biomass_kg_ha_var = var(net_biomass_kg_ha, na.rm = T),
             net_biomass_kg_ha_sd = sd(net_biomass_kg_ha, na.rm = T),
@@ -40,6 +44,22 @@ a <- dat2 %>%
   theme_classic()
 a
 
+a2 <- dat2 %>% 
+  group_by(harvested, year) %>% 
+  summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
+            net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
+  ggplot() +
+  geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
+                  ymax = net_enhance  + net_sd), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_enhance), col = 'red') +
+  facet_wrap(~harvested, scales = 'free_y') +
+  ylab('') +
+  ggtitle('B) All species (+- SD): Havested vs. non-harvested') +
+  xlab('Year') +
+  #ylim(c(0,1500)) +
+  theme_classic()
+a2 
+
 # species with uncertainty
 
 b <- dat2 %>% 
@@ -49,20 +69,24 @@ b <- dat2 %>%
   geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species)) +
   ylab('') +
   xlab('Year') +
-  ggtitle('B) Individual species (+- SD)') +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
+  ggtitle('C) Individual species (+- SD) at each site') +
+  facet_wrap(~site, scales = 'free_y') +
   #ylim(c(0,80)) +
   theme_classic() +
-  theme(legend.position = 'none')
+  theme(legend.title = element_blank()) 
 b
 
 # plot by species
 
-c <- filter(dat2, species == 'Smooth toadfish') %>% 
+c <- dat2 %>% 
   ggplot() +
   geom_area(aes(x = year, y = net_biomass_kg_ha_mean, fill = factor(species)), position = 'stack') +
   ylab('') +
   xlab('Year') +
-  ggtitle('C) Cumulative individual species') +
+  ggtitle('D) Individual species (cumulative) at each site') +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
+  facet_wrap(~site, scales = 'free_y') +
   #ylim(c(0,80)) +
   theme_classic() +
   theme(legend.title = element_blank()) 
@@ -70,10 +94,11 @@ c
 
 # plot together
 
-g <- a+b+c
+d <- a+a2+ plot_layout(nrow = 1, widths = c(0.5, 1))
+g <- d/b/c
 g
 
-ggsave('outputs/bioenhancement.png', width = 12, height = 4)
+ggsave('outputs/bioenhancement.png', width = 10, height = 10)
 
 # plot sensitivity to m, total and species
 
