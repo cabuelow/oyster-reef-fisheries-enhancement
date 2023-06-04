@@ -17,7 +17,7 @@ dat2 <- dat %>%
   filter(m == 'm') %>% # using selected 'm' values for main results
   group_by(sim, species, harvested, site, year) %>% 
   summarise(net_biomass_kg_ha = sum(net_biomass_kg_ha)) %>%  # here summing by gender 
-  group_by(species, harvested, site, year) %>% 
+  group_by(species, harvested, site, year) %>% # here summarizing across simulations for each site
   summarise(net_biomass_kg_ha_mean = mean(net_biomass_kg_ha, na.rm = T),
             net_biomass_kg_ha_var = var(net_biomass_kg_ha, na.rm = T),
             net_biomass_kg_ha_sd = sd(net_biomass_kg_ha, na.rm = T),
@@ -26,38 +26,58 @@ dat2 <- dat %>%
             net_biomass_kg_ha_upp = quantile(net_biomass_kg_ha, 0.75, na.rm = T),
             net_biomass_kg_ha_low = quantile(net_biomass_kg_ha, 0.25, na.rm = T))
 
-# total biomass enhancement across all species
-# have same sample size for each species in each year, so don't need to weight variance or biomass estimates by sample size
+# plot biomass enhancment through time
 
-a <- dat2 %>% 
-  group_by(year) %>% 
+location_average <- dat2 %>% 
+  group_by(site, year) %>% # sum biomass across species at each site
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
             net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
+  group_by(year) %>% # average biomass enhancement across sites
+  summarise(net_enhance = mean(net_enhance),
+            net_sd = mean(net_sd))
+location_average = data.frame(site = 'Location average', location_average)
+
+a <- dat2 %>% 
+  group_by(site, year) %>% 
+  summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
+            net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
+  rbind(location_average) %>% 
+  mutate(site = factor(site, levels = c('Margarets Reef', 'Location average', 'Dromana', 'Glenelg'))) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
-                  ymax = net_enhance  + net_sd), fill = "grey", alpha = 0.5) +
-  geom_line(aes(x = year, y = net_enhance), col = 'red') +
+                  ymax = net_enhance  + net_sd, group = site), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_enhance, col = site)) +
+  scale_color_manual(values = c("Margarets Reef" = "lightblue", 
+                                "Location average" = 'black', 
+                                "Dromana" = "pink",
+                                'Glenelg' = 'lightgreen')) +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
-  ggtitle('A) All species (+- SD)') +
+  ggtitle('A) Species summed by location, then averaged (+- SD)') +
   xlab('Year') +
-  #ylim(c(0,1500)) +
-  theme_classic()
+  theme_classic() +
+  theme(legend.title = element_blank(),
+        plot.title = element_text(size = 11))
 a
 
 a2 <- dat2 %>% 
-  group_by(harvested, year) %>% 
+  group_by(harvested, site, year) %>% 
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
             net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
+  group_by(harvested, year) %>% 
+  summarise(net_enhance = mean(net_enhance), 
+            net_sd = mean(net_sd)) %>%
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
-                  ymax = net_enhance  + net_sd), fill = "grey", alpha = 0.5) +
-  geom_line(aes(x = year, y = net_enhance), col = 'red') +
-  facet_wrap(~harvested, scales = 'free_y') +
-  ylab('') +
+                  ymax = net_enhance  + net_sd, group = harvested), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_enhance, col = harvested)) +
+  #facet_wrap(~harvested, scales = 'free_y') +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
   ggtitle('B) All species (+- SD): Havested vs. non-harvested') +
   xlab('Year') +
   #ylim(c(0,1500)) +
-  theme_classic()
+  theme_classic() +
+  theme(legend.title = element_blank(),
+        plot.title = element_text(size = 11))
 a2 
 
 # species with uncertainty
@@ -65,7 +85,7 @@ a2
 b <- dat2 %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
-                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.5) +
+                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.2) +
   geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species)) +
   ylab('') +
   xlab('Year') +
@@ -74,7 +94,8 @@ b <- dat2 %>%
   facet_wrap(~site, scales = 'free_y') +
   #ylim(c(0,80)) +
   theme_classic() +
-  theme(legend.title = element_blank()) 
+  theme(legend.title = element_blank(),
+        plot.title = element_text(size = 11))
 b
 
 # plot by species
@@ -89,16 +110,17 @@ c <- dat2 %>%
   facet_wrap(~site, scales = 'free_y') +
   #ylim(c(0,80)) +
   theme_classic() +
-  theme(legend.title = element_blank()) 
+  theme(legend.title = element_blank(),
+        plot.title = element_text(size = 11))
 c
 
 # plot together
 
-d <- a+a2+ plot_layout(nrow = 1, widths = c(0.5, 1))
+d <- a+a2 # plot_layout(nrow = 1, widths = c(0.5, 1))
 g <- d/b/c
 g
 
-ggsave('outputs/bioenhancement.png', width = 10, height = 10)
+ggsave('outputs/bioenhancement.png', width = 10.5, height = 10.5)
 
 # plot sensitivity to m, total and species
 

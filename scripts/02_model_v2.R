@@ -9,7 +9,7 @@ set.seed(123)
 
 # load data
 
-dat <- read.csv('data/wrangled-dat.csv')
+dat <- read.csv('data/wrangled-dat.csv') %>% filter(!is.na(d_se)) # for now removing rows where std error is missing
 num_years <- max(dat$t_max) # model through to maximum lifespan of species
 mort_iter <- unique(dat$mortality) # mortality to iterate over for sensitivity analysis
 
