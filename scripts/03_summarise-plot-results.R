@@ -70,11 +70,9 @@ a2 <- dat2 %>%
   geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
                   ymax = net_enhance  + net_sd, group = harvested), fill = "grey", alpha = 0.5) +
   geom_line(aes(x = year, y = net_enhance, col = harvested)) +
-  #facet_wrap(~harvested, scales = 'free_y') +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
   ggtitle('B) All species (+- SD): Havested vs. non-harvested') +
   xlab('Year') +
-  #ylim(c(0,1500)) +
   theme_classic() +
   theme(legend.title = element_blank(),
         plot.title = element_text(size = 11))
@@ -92,7 +90,6 @@ b <- dat2 %>%
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
   ggtitle('C) Individual species (+- SD) at each site') +
   facet_wrap(~site, scales = 'free_y') +
-  #ylim(c(0,80)) +
   theme_classic() +
   theme(legend.title = element_blank(),
         plot.title = element_text(size = 11))
@@ -108,7 +105,6 @@ c <- dat2 %>%
   ggtitle('D) Individual species (cumulative) at each site') +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
   facet_wrap(~site, scales = 'free_y') +
-  #ylim(c(0,80)) +
   theme_classic() +
   theme(legend.title = element_blank(),
         plot.title = element_text(size = 11))
