@@ -11,6 +11,8 @@ dat_param <- read.csv('data/fish-dat.csv') %>%
   select(species, harvested) %>% distinct() %>% 
   mutate(harvested = recode(harvested, 'y' = 'Harvested species', 'n' = 'Non-harvested species'))
 
+# calculate net biomass enhancement per species at each site across all simulated values
+
 dat2 <- dat %>% 
   left_join(select(dat_param, species, harvested), by = 'species') %>% 
   mutate(net_biomass_kg_ha = (net_biomass_g_unit_area/100)*10) %>% # unit area is 100m2, so divide by 100 to get g/m2, then multiply by 10 to get kg/ha
@@ -26,26 +28,28 @@ dat2 <- dat %>%
             net_biomass_kg_ha_upp = quantile(net_biomass_kg_ha, 0.75, na.rm = T),
             net_biomass_kg_ha_low = quantile(net_biomass_kg_ha, 0.25, na.rm = T))
 
-# plot biomass enhancment through time
+# sum biomass at each site, then average across sites
+# pool variance and weight by sample size (i.e., number of species at a site) to get SDs
 
-location_average <- dat2 %>% 
-  group_by(site, year) %>% # sum biomass across species at each site
+site_average <- dat2 %>% 
+  group_by(site, year) %>% # sum biomass and variance at each site across species
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
-            net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
+            net_var = sum(net_biomass_kg_ha_var),
+            n = n()) %>%
   group_by(year) %>% # average biomass enhancement across sites
   summarise(net_enhance = mean(net_enhance),
-            net_sd = mean(net_sd))
-location_average = data.frame(site = 'Location average', location_average)
+            net_sd = sqrt(weighted.mean(net_var, n)))
+site_average = data.frame(site = 'Location average', site_average)
 
 a <- dat2 %>% 
   group_by(site, year) %>% 
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
             net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
-  rbind(location_average) %>% 
+  rbind(site_average) %>% 
   mutate(site = factor(site, levels = c('Margarets Reef', 'Location average', 'Dromana', 'Glenelg'))) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
-                  ymax = net_enhance  + net_sd, group = site), fill = "grey", alpha = 0.5) +
+                  ymax = net_enhance  + net_sd, group = site), fill = "grey", alpha = 0.2) +
   geom_line(aes(x = year, y = net_enhance, col = site)) +
   scale_color_manual(values = c("Margarets Reef" = "lightblue", 
                                 "Location average" = 'black', 
@@ -62,16 +66,21 @@ a
 a2 <- dat2 %>% 
   group_by(harvested, site, year) %>% 
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
-            net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
+             net_var = sum(net_biomass_kg_ha_var),
+             n = n()) %>%
   group_by(harvested, year) %>% 
   summarise(net_enhance = mean(net_enhance), 
-            net_sd = mean(net_sd)) %>%
+            net_sd = sqrt(weighted.mean(net_var, n))) %>% 
+  mutate(ymin = net_enhance - net_sd,
+         ymax = net_enhance  + net_sd) %>% 
+  mutate(ymin = ifelse(ymin <0, 0, ymin), 
+         ymax = ifelse(ymax < 0, 0, ymax)) %>% 
   ggplot() +
-  geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
-                  ymax = net_enhance  + net_sd, group = harvested), fill = "grey", alpha = 0.5) +
+  geom_ribbon(aes(x = year, ymin = ymin, 
+                  ymax = ymax, group = harvested), fill = "grey", alpha = 0.2) +
   geom_line(aes(x = year, y = net_enhance, col = harvested)) +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
-  ggtitle('B) All species (+- SD): Havested vs. non-harvested') +
+  ggtitle('B) All species (+- SD): Harvested vs. non-harvested') +
   xlab('Year') +
   theme_classic() +
   theme(legend.title = element_blank(),
