@@ -13,13 +13,14 @@ dat <- read.csv('data/fish-dat.csv') %>%
 
 # juvenile densities
 
-dat_density <- read.csv('data/juvenile_densities_20230529.csv') %>% 
+dat_density <- read.csv('data/juvenile_densities_20230612.csv') %>% 
   pivot_wider(id_cols = c(Site, common_name), names_from = 'Habitat_agg', 
               values_from = c('densitymean', 'densityvar', 'densitystd', 'n')) %>% 
   mutate(d = densitymean_Reef - densitymean_Unstructured) %>% # calculate density enhancement
   filter(d > 0) %>% # filter for only positive density enhancements
-  #mutate(d_se = (sqrt((densityvar_Reef*n_y_Reef)+(densityvar_Unstructured*n_y_Unstructured))/(n_y_Reef+n_y_Unstructured))/sqrt((n_y_Reef+n_y_Unstructured)/2)) %>% # calculate standard error via weighted average of variances
-  mutate(d_se = densitystd_Reef/sqrt(n_Reef)) %>% # all of the densities on unstructured are 0, so will just use standard error of reef
+  mutate(d_std_weighted = sqrt(((densityvar_Reef*n_Reef)+(densityvar_Unstructured*n_Unstructured))/(n_Reef+n_Unstructured))) %>% 
+  mutate(d_se = d_std_weighted/sqrt(n_Reef+n_Unstructured)) %>% # calculate standard error via weighted average of variances
+  #mutate(d_se2 = densitystd_Reef/sqrt(n_Reef)) %>% # all of the densities on unstructured are 0, so will just use standard error of reef
   data.frame()
 
 # join to other data frame
