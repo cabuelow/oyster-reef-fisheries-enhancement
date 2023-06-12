@@ -9,7 +9,7 @@ set.seed(123)
 
 # load data
 
-dat <- read.csv('data/wrangled-dat.csv') %>% filter(!is.na(d_se)) # for now removing rows where std error is missing
+dat <- read.csv('data/wrangled-dat.csv')
 num_years <- max(dat$t_max) # model through to maximum lifespan of species
 mort_iter <- unique(dat$mortality) # mortality to iterate over for sensitivity analysis
 
@@ -18,7 +18,7 @@ mort_iter <- unique(dat$mortality) # mortality to iterate over for sensitivity a
 # apply biomass enhancement model to the density distribution to estimate enhancement uncertainty
 # note that densities are provided as meanCount/m2 (average number of individuals/100m2)
 
-n <- 100 # bump up down the road
+n <- 10000 # bump up down the road
 spp <- unique(dat$species)
 tmp <- list()
 
@@ -26,6 +26,7 @@ tmp <- list()
 # iterating through different mortality estimates for sensitivity analysis
 # and for males vs. females
 
+system.time(
 for(i in seq_along(mort_iter)){
   dat2 <- dat %>% filter(mortality == mort_iter[i])
   tmp2 <- list()
@@ -62,6 +63,7 @@ for(i in seq_along(mort_iter)){
   }
   tmp[[i]] <- data.frame(m = mort_iter[i], do.call(rbind, tmp2))
 }
+)
 
 results <- do.call(rbind, tmp)
 

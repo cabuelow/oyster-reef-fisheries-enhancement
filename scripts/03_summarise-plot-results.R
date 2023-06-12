@@ -6,7 +6,7 @@ library(RColorBrewer)
 
 # calculate mean, standard deviation, upper and lower quartiles of biomass enhancement for each species in each year
 
-dat <- read.csv('outputs/biomass-enhancement.csv') 
+dat <- read.csv('outputs/biomass-enhancement.csv') #%>% filter(species != 'Australasian snapper')
 dat_param <- read.csv('data/fish-dat.csv') %>% 
   select(species, harvested) %>% distinct() %>% 
   mutate(harvested = recode(harvested, 'y' = 'Harvested species', 'n' = 'Non-harvested species'))
