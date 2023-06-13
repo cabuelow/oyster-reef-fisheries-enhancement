@@ -162,7 +162,7 @@ b2 <- margaret %>%
   ylab('') +
   xlab('Year') +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
-  ggtitle('B) Top 3 species at each location') +
+  ggtitle('B) Top 3 species by location') +
   facet_wrap(~site, scales = 'free_y') +
   theme_classic() +
   theme(legend.title = element_blank(),
@@ -219,7 +219,7 @@ ggsave('outputs/bioenhancement_Fig3B.png', width = 9.5, height = 4.5)
 
 b/b2+b3+b4+plot_layout(design = "11#
                        234")
-ggsave('outputs/bioenhancement_Fig3AB.png', width = 9, height = 7)
+ggsave('outputs/bioenhancement_Fig3AB.png', width = 8, height = 7)
 
 # plot sensitivity to m, total and species
 
