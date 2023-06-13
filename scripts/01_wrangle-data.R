@@ -8,6 +8,7 @@ dat <- read.csv('data/fish-dat.csv') %>%
   mutate(m = ifelse(is.na(use_m), m_Then2014, m)) %>% # here use literature 'm' values when confident, otherwise use Then eqn
   mutate(t_harv = ifelse(harvested == 'y', t_harv, t_maturity)) %>% # for species that aren't harvested, setting their t_harv value to age at maturity instead
   mutate(t_harv = ifelse(t_harv < 1, 1, t_harv)) %>% # if time of harvest or maturity is less than 1 year, set it to first year (otherwise can model at finer resolution)
+  mutate(t_max = ifelse(t_max < 1, 1, t_max)) %>% # if total age is less than 1 year, set it to first year (otherwise can model at finer resolution)
   pivot_longer(cols = c(m, m_Then2014), names_to = 'mortality', values_to = 'mortality_val') %>% 
   data.frame()
 

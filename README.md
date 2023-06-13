@@ -7,7 +7,6 @@ This repository provides code to estimate fisheries enhancement from restored oy
 - [ ] Assuming a 1:1 ratio M:F and dividing densities by 2, modelling Males and Females separately, and summing up per species at the end
 - [ ] Net biomass enhancement only calculates enhancement from incremental weight gains after the fish are recruited to the fishery (are harvestable). So doesn't double count weight already gained in previous years, considering fish that survive each year
 - [ ] Could alternatively do biomass enhancement from juvenile recruitment (i.e. age 1)
-- [ ] For species that aren't harvested, setting their t_harv value to 1st year of life so can estimate biomass enhancment over entire lifespan
 
 ### TODO
 

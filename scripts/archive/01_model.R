@@ -3,15 +3,15 @@
 # set up some initial params
 
 dens <- 0.072 # juveniles per unit area enhanced by restoration
-m <- 0.2 # annual mortality rate
-t_max <- 16 # maximum age
-t_0 <- -1.13 # theoretical age when length is 0
+m <- 6.707877456 # annual mortality rate
+t_max <- 1 # maximum age
+t_0 <- 0 # theoretical age when length is 0
 t_harv <- 1 # age of recruitment to fishery
-l_asym <- 38.1 # asymptotic size (length in cm)
-Ks <- 0.39 # Brody growth coef 
-a <- 0.0343 # intercept of length-weight relationship
-b <- 2.91 # slope of length-weight relationship
-years <- 16 # number of years since restoration
+l_asym <- 55 # asymptotic size (length in cm)
+Ks <- 3 # Brody growth coef 
+a <- 0.958 # intercept of length-weight relationship
+b <- 1.22533 # slope of length-weight relationship
+years <- 16  # number of years since restoration
 
 # set up as a dataframe
 

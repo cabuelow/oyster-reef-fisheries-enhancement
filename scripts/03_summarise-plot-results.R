@@ -6,7 +6,7 @@ library(RColorBrewer)
 
 # calculate mean, standard deviation, upper and lower quartiles of biomass enhancement for each species in each year
 
-dat <- read.csv('outputs/biomass-enhancement.csv') #%>% filter(species != 'Australasian snapper')
+dat <- read.csv('outputs/biomass-enhancement.csv')
 dat_param <- read.csv('data/fish-dat.csv') %>% 
   select(species, harvested) %>% distinct() %>% 
   mutate(harvested = recode(harvested, 'y' = 'Harvested species', 'n' = 'Non-harvested species'))
@@ -39,28 +39,32 @@ site_average <- dat2 %>%
   group_by(year) %>% # average biomass enhancement across sites
   summarise(net_enhance = mean(net_enhance),
             net_sd = sqrt(weighted.mean(net_var, n)))
-site_average = data.frame(site = 'Location average', site_average)
+site_average <- data.frame(site = 'Average all locations', site_average)
 
 a <- dat2 %>% 
   group_by(site, year) %>% 
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
             net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
   rbind(site_average) %>% 
-  mutate(site = factor(site, levels = c('Margarets Reef', 'Location average', 'Dromana', 'Glenelg'))) %>% 
+  mutate(site = factor(site, levels = c('Margarets Reef', 'Average all locations', 'Dromana', 'Glenelg'))) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
-                  ymax = net_enhance  + net_sd, group = site), fill = "grey", alpha = 0.2) +
-  geom_line(aes(x = year, y = net_enhance, col = site)) +
+                  ymax = net_enhance  + net_sd, group = site), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_enhance, col = site), linewidth = 1, alpha = 0.7) +
   scale_color_manual(values = c("Margarets Reef" = "lightblue", 
-                                "Location average" = 'black', 
+                                "Average all locations" = 'black', 
                                 "Dromana" = "pink",
-                                'Glenelg' = 'lightgreen')) +
-  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
-  ggtitle('A) Species summed by location, then averaged (+- SD)') +
+                                'Glenelg' = 'lightgreen'),
+                     labels = c("Margaret", 'Average all locations', 'Dromana', 'Glenelg')) +
+  scale_y_continuous(labels = scales::comma) +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
+  ggtitle('A) Species summed by location, then averaged') +
   xlab('Year') +
   theme_classic() +
   theme(legend.title = element_blank(),
-        plot.title = element_text(size = 11))
+        legend.position = 'bottom',
+        plot.title = element_text(size = 11)) +
+  guides(color=guide_legend(nrow=2,byrow=TRUE))
 a
 
 a2 <- dat2 %>% 
@@ -77,32 +81,135 @@ a2 <- dat2 %>%
          ymax = ifelse(ymax < 0, 0, ymax)) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = ymin, 
-                  ymax = ymax, group = harvested), fill = "grey", alpha = 0.2) +
-  geom_line(aes(x = year, y = net_enhance, col = harvested)) +
-  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
-  ggtitle('B) All species (+- SD): Harvested vs. non-harvested') +
+                  ymax = ymax, group = harvested), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_enhance, col = harvested), linewidth = 1) +
+  scale_y_continuous(labels = scales::comma) +
+  ylab('') +
+  #ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
+  ggtitle('B) Harvested vs Non-Harvested species') +
   xlab('Year') +
   theme_classic() +
   theme(legend.title = element_blank(),
-        plot.title = element_text(size = 11))
+        legend.position = 'bottom',
+        plot.title = element_text(size = 11)) +
+  guides(color=guide_legend(nrow=2,byrow=TRUE))
 a2 
 
-# species with uncertainty
+a + a2
+
+ggsave('outputs/bioenhancement_Fig2.png', width = 8, height = 4)
+
+# snapper vs. not snapper
 
 b <- dat2 %>% 
+  filter(site != 'Glenelg') %>% 
+  mutate(snap = ifelse(species == 'Australasian snapper', 'Australiasian snapper', 'Other species')) %>% 
+  mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
+  group_by(snap, site, year) %>% 
+  summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
+            net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
+  mutate(site = factor(site, levels = c('Margaret', 'Average all locations', 'Dromana', 'Glenelg'))) %>% 
+  mutate(ymin = net_enhance - net_sd,
+         ymax = net_enhance  + net_sd) %>% 
+  mutate(ymin = ifelse(ymin <0, 0, ymin), 
+         ymax = ifelse(ymax < 0, 0, ymax)) %>% 
+  ggplot() +
+  geom_ribbon(aes(x = year, ymin = ymin, 
+                  ymax = ymax, group = snap), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_enhance, col = snap), linewidth = 1) +
+  scale_y_continuous(labels = scales::comma) +
+  facet_wrap(~site) + #scales = 'free_y') +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
+  #ggtitle('A) Harvested vs Non-Harvested species') +
+  xlab('Year') +
+  theme_classic() +
+  theme(legend.title = element_blank(),
+        #legend.position = 'bottom',
+        plot.title = element_text(size = 11)) #+
+  #guides(color=guide_legend(nrow=2,byrow=TRUE))
+b
+
+ggsave('outputs/bioenhancement_Fig3A_v2.png', width = 8, height = 3)
+
+# top 3 species with uncertainty
+
+dromana <- dat2 %>%
+  filter(year == 40 & site == 'Dromana') %>% 
+  arrange(desc(net_biomass_kg_ha_mean))
+
+margaret <- dat2 %>%
+  filter(year == 40 & site == 'Margarets Reef') %>% 
+  arrange(desc(net_biomass_kg_ha_mean))
+
+glenelg <- dat2 %>%
+  filter(year == 40 & site == 'Glenelg') %>% 
+  arrange(desc(net_biomass_kg_ha_mean))
+
+dromana <- dat2 %>% filter(site == 'Dromana' & species %in% dromana$species[2:4])
+margaret <- dat2 %>% filter(site == 'Margarets Reef' & species %in% margaret$species[2:4])
+glenelg <- dat2 %>% filter(site == 'Glenelg' & species %in% glenelg$species[1:3])
+
+b2 <- margaret %>% 
+  mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
+  group_by(site, species, year) %>% 
+  slice_max(order_by = net_biomass_kg_ha_mean, n = 3) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
-                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.2) +
-  geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species)) +
+                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species), linewidth = 1) +
   ylab('') +
   xlab('Year') +
-  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
-  ggtitle('C) Individual species (+- SD) at each site') +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
+  #ggtitle('C) Individual species at each location') +
   facet_wrap(~site, scales = 'free_y') +
   theme_classic() +
   theme(legend.title = element_blank(),
-        plot.title = element_text(size = 11))
-b
+        legend.position = 'bottom',
+        plot.title = element_text(size = 11)) +
+  guides(color=guide_legend(nrow=3,byrow=TRUE))
+b2
+
+b3 <- dromana %>% 
+  group_by(site, species, year) %>% 
+  slice_max(order_by = net_biomass_kg_ha_mean, n = 3) %>% 
+  ggplot() +
+  geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
+                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species), linewidth = 1) +
+  ylab('') +
+  xlab('Year') +
+  #ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
+  #ggtitle('C) Individual species at each location') +
+  facet_wrap(~site, scales = 'free_y') +
+  theme_classic() +
+  theme(legend.title = element_blank(),
+        legend.position = 'bottom',
+        plot.title = element_text(size = 11)) +
+  guides(color=guide_legend(nrow=3,byrow=TRUE))
+b3
+
+b4 <- glenelg %>% 
+  group_by(site, species, year) %>% 
+  slice_max(order_by = net_biomass_kg_ha_mean, n = 3) %>% 
+  ggplot() +
+  geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
+                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.5) +
+  geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species), linewidth = 1) +
+  ylab('') +
+  xlab('Year') +
+  #ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
+  #ggtitle('C) Individual species at each location') +
+  facet_wrap(~site, scales = 'free_y') +
+  theme_classic() +
+  theme(legend.title = element_blank(),
+        legend.position = 'bottom',
+        plot.title = element_text(size = 11)) +
+  guides(color=guide_legend(nrow=3,byrow=TRUE))
+b4
+
+b2+b3+b4
+
+ggsave('outputs/bioenhancement_Fig3B.png', width = 9.5, height = 4.5)
 
 # plot by species
 
@@ -111,8 +218,8 @@ c <- dat2 %>%
   geom_area(aes(x = year, y = net_biomass_kg_ha_mean, fill = factor(species)), position = 'stack') +
   ylab('') +
   xlab('Year') +
-  ggtitle('D) Individual species (cumulative) at each site') +
-  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~year^-1*')')) +
+  ggtitle('D) Individual species (cumulative) at each location') +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
   facet_wrap(~site, scales = 'free_y') +
   theme_classic() +
   theme(legend.title = element_blank(),
@@ -138,7 +245,7 @@ e <- dat %>%
   geom_jitter(alpm2 = 0.1, size = 0.2, width = 0.1) +
   geom_violin(fill = 'transparent', col = 'cyan') +
   ggtitle('A) All species') +
-  ylab(bquote('Biomass enm2ncement (g ' ~m2^-1~year^-1*')')) +
+  ylab(bquote('Biomass enm2ncement (g ' ~m2^-1~yr^-1*')')) +
   xlab('') +
   theme_classic()
 e  
