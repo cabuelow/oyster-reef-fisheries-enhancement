@@ -49,12 +49,12 @@ a <- dat2 %>%
   mutate(site = factor(site, levels = c('Margarets Reef', 'Average all locations', 'Dromana', 'Glenelg'))) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
-                  ymax = net_enhance  + net_sd, group = site), fill = "grey", alpha = 0.5) +
+                  ymax = net_enhance  + net_sd, group = site), fill = "grey", alpha = 0.3) +
   geom_line(aes(x = year, y = net_enhance, col = site), linewidth = 1, alpha = 0.7) +
-  scale_color_manual(values = c("Margarets Reef" = "lightblue", 
+  scale_color_manual(values = c("Margarets Reef" = "cyan3", 
                                 "Average all locations" = 'black', 
-                                "Dromana" = "pink",
-                                'Glenelg' = 'lightgreen'),
+                                "Dromana" = "palevioletred1",
+                                'Glenelg' = 'seagreen2'),
                      labels = c("Margaret", 'Average all locations', 'Dromana', 'Glenelg')) +
   scale_y_continuous(labels = scales::comma) +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
@@ -62,9 +62,9 @@ a <- dat2 %>%
   xlab('Year') +
   theme_classic() +
   theme(legend.title = element_blank(),
-        legend.position = 'bottom',
-        plot.title = element_text(size = 11)) +
-  guides(color=guide_legend(nrow=2,byrow=TRUE))
+        #legend.position = 'bottom',
+        plot.title = element_text(size = 11)) #+
+  #guides(color=guide_legend(nrow=2,byrow=TRUE))
 a
 
 a2 <- dat2 %>% 
@@ -81,23 +81,25 @@ a2 <- dat2 %>%
          ymax = ifelse(ymax < 0, 0, ymax)) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = ymin, 
-                  ymax = ymax, group = harvested), fill = "grey", alpha = 0.5) +
+                  ymax = ymax, group = harvested), fill = "grey", alpha = 0.3) +
   geom_line(aes(x = year, y = net_enhance, col = harvested), linewidth = 1) +
+  scale_color_manual(values = c("Harvested species" = "indianred2", 
+                                "Non-harvested species" = 'darkslategray4')) +
   scale_y_continuous(labels = scales::comma) +
-  ylab('') +
-  #ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
+  #ylab('') +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
   ggtitle('B) Harvested vs Non-Harvested species') +
   xlab('Year') +
   theme_classic() +
   theme(legend.title = element_blank(),
-        legend.position = 'bottom',
-        plot.title = element_text(size = 11)) +
-  guides(color=guide_legend(nrow=2,byrow=TRUE))
+        #legend.position = 'bottom',
+        plot.title = element_text(size = 11)) #+
+  #guides(color=guide_legend(nrow=2,byrow=TRUE))
 a2 
 
 a + a2
 
-ggsave('outputs/bioenhancement_Fig2.png', width = 8, height = 4)
+ggsave('outputs/bioenhancement_Fig2.png', width = 10, height = 3)
 
 # snapper vs. not snapper
 
@@ -115,52 +117,52 @@ b <- dat2 %>%
          ymax = ifelse(ymax < 0, 0, ymax)) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = ymin, 
-                  ymax = ymax, group = snap), fill = "grey", alpha = 0.5) +
+                  ymax = ymax, group = snap), fill = "grey", alpha = 0.3) +
   geom_line(aes(x = year, y = net_enhance, col = snap), linewidth = 1) +
   scale_y_continuous(labels = scales::comma) +
   facet_wrap(~site) + #scales = 'free_y') +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
-  #ggtitle('A) Harvested vs Non-Harvested species') +
+  ggtitle('A) Australasian snapper vs. all other species') +
   xlab('Year') +
   theme_classic() +
   theme(legend.title = element_blank(),
-        #legend.position = 'bottom',
-        plot.title = element_text(size = 11)) #+
-  #guides(color=guide_legend(nrow=2,byrow=TRUE))
+        legend.position = 'bottom',
+        plot.title = element_text(size = 11)) +
+  guides(color=guide_legend(nrow=1,byrow=TRUE))
 b
 
-ggsave('outputs/bioenhancement_Fig3A_v2.png', width = 8, height = 3)
+ggsave('outputs/bioenhancement_Fig3A.png', width = 7, height = 3)
 
 # top 3 species with uncertainty
 
-dromana <- dat2 %>%
+drom <- dat2 %>%
   filter(year == 40 & site == 'Dromana') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
-margaret <- dat2 %>%
+marg <- dat2 %>%
   filter(year == 40 & site == 'Margarets Reef') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
-glenelg <- dat2 %>%
+glen <- dat2 %>%
   filter(year == 40 & site == 'Glenelg') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
-dromana <- dat2 %>% filter(site == 'Dromana' & species %in% dromana$species[2:4])
-margaret <- dat2 %>% filter(site == 'Margarets Reef' & species %in% margaret$species[2:4])
-glenelg <- dat2 %>% filter(site == 'Glenelg' & species %in% glenelg$species[1:3])
+dromana <- dat2 %>% filter(site == 'Dromana' & species %in% drom$species[2:4])
+margaret <- dat2 %>% filter(site == 'Margarets Reef' & species %in% marg$species[2:4])
+glenelg <- dat2 %>% filter(site == 'Glenelg' & species %in% glen$species[1:3])
 
 b2 <- margaret %>% 
   mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
-  group_by(site, species, year) %>% 
-  slice_max(order_by = net_biomass_kg_ha_mean, n = 3) %>% 
+  mutate(species = factor(species, levels = marg$species[2:4])) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
-                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.5) +
+                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.3) +
   geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species), linewidth = 1) +
+  scale_color_manual(values = c("seagreen3", 'goldenrod2', 'darkslategray4')) +
   ylab('') +
   xlab('Year') +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
-  #ggtitle('C) Individual species at each location') +
+  ggtitle('B) Top 3 species at each location') +
   facet_wrap(~site, scales = 'free_y') +
   theme_classic() +
   theme(legend.title = element_blank(),
@@ -171,11 +173,12 @@ b2
 
 b3 <- dromana %>% 
   group_by(site, species, year) %>% 
-  slice_max(order_by = net_biomass_kg_ha_mean, n = 3) %>% 
+  mutate(species = factor(species, levels = drom$species[2:4])) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
-                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.5) +
+                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.3) +
   geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species), linewidth = 1) +
+  scale_color_manual(values = c("seagreen3", 'goldenrod2', 'darkslategray4')) +
   ylab('') +
   xlab('Year') +
   #ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
@@ -190,11 +193,12 @@ b3
 
 b4 <- glenelg %>% 
   group_by(site, species, year) %>% 
-  slice_max(order_by = net_biomass_kg_ha_mean, n = 3) %>% 
+  mutate(species = factor(species, levels = glen$species[1:3])) %>% 
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
-                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.5) +
+                  ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.3) +
   geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species), linewidth = 1) +
+  scale_color_manual(values = c("seagreen3", 'goldenrod2', 'darkslategray4')) +
   ylab('') +
   xlab('Year') +
   #ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
@@ -211,28 +215,11 @@ b2+b3+b4
 
 ggsave('outputs/bioenhancement_Fig3B.png', width = 9.5, height = 4.5)
 
-# plot by species
+# combine into one fig
 
-c <- dat2 %>% 
-  ggplot() +
-  geom_area(aes(x = year, y = net_biomass_kg_ha_mean, fill = factor(species)), position = 'stack') +
-  ylab('') +
-  xlab('Year') +
-  ggtitle('D) Individual species (cumulative) at each location') +
-  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
-  facet_wrap(~site, scales = 'free_y') +
-  theme_classic() +
-  theme(legend.title = element_blank(),
-        plot.title = element_text(size = 11))
-c
-
-# plot together
-
-d <- a+a2 # plot_layout(nrow = 1, widths = c(0.5, 1))
-g <- d/b/c
-g
-
-ggsave('outputs/bioenhancement.png', width = 10.5, height = 10.5)
+b/b2+b3+b4+plot_layout(design = "11#
+                       234")
+ggsave('outputs/bioenhancement_Fig3AB.png', width = 9, height = 7)
 
 # plot sensitivity to m, total and species
 
