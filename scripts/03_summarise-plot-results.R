@@ -50,12 +50,13 @@ a <- dat2 %>%
   ggplot() +
   geom_ribbon(aes(x = year, ymin = net_enhance - net_sd, 
                   ymax = net_enhance  + net_sd, group = site), fill = "grey", alpha = 0.3) +
-  geom_line(aes(x = year, y = net_enhance, col = site), linewidth = 1, alpha = 0.7) +
+  geom_line(aes(x = year, y = net_enhance, col = site, linewidth = site), alpha = 0.7) +
   scale_color_manual(values = c("Margarets Reef" = "cyan3", 
                                 "Average all locations" = 'black', 
                                 "Dromana" = "palevioletred1",
                                 'Glenelg' = 'seagreen2'),
                      labels = c("Margaret", 'Average all locations', 'Dromana', 'Glenelg')) +
+  scale_linewidth_manual(values = c(1, 2, 1, 1), guide = 'none') +
   scale_y_continuous(labels = scales::comma) +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
   ggtitle('A) Species summed by location, then averaged') +
@@ -88,7 +89,7 @@ a2 <- dat2 %>%
   scale_y_continuous(labels = scales::comma) +
   #ylab('') +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
-  ggtitle('B) Harvested vs Non-Harvested species') +
+  ggtitle('B) Harvested vs. Non-Harvested species') +
   xlab('Year') +
   theme_classic() +
   theme(legend.title = element_blank(),
@@ -105,7 +106,7 @@ ggsave('outputs/bioenhancement_Fig2.png', width = 10, height = 3)
 
 b <- dat2 %>% 
   filter(site != 'Glenelg') %>% 
-  mutate(snap = ifelse(species == 'Australasian snapper', 'Australiasian snapper', 'Other species')) %>% 
+  mutate(snap = ifelse(species == 'Australasian snapper', 'Australasian snapper', 'Other species')) %>% 
   mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
   group_by(snap, site, year) %>% 
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
@@ -126,9 +127,9 @@ b <- dat2 %>%
   xlab('Year') +
   theme_classic() +
   theme(legend.title = element_blank(),
-        legend.position = 'bottom',
-        plot.title = element_text(size = 11)) +
-  guides(color=guide_legend(nrow=1,byrow=TRUE))
+        #legend.position = 'bottom',
+        plot.title = element_text(size = 11)) #+
+  #guides(color=guide_legend(nrow=1,byrow=TRUE))
 b
 
 ggsave('outputs/bioenhancement_Fig3A.png', width = 7, height = 3)
@@ -213,12 +214,11 @@ b4
 
 b2+b3+b4
 
-ggsave('outputs/bioenhancement_Fig3B.png', width = 9.5, height = 4.5)
+ggsave('outputs/bioenhancement_Fig3B.png', width = 9, height = 4.1)
 
 # combine into one fig
 
-b/b2+b3+b4+plot_layout(design = "11#
-                       234")
+b/b2+b3+b4+plot_layout(design = c(area(1,1,1,2), area(2,1,2,1), area(2,2,2,2), area(2,3,2,3)))
 ggsave('outputs/bioenhancement_Fig3AB.png', width = 8, height = 7)
 
 # plot sensitivity to m, total and species
