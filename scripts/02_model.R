@@ -18,7 +18,7 @@ mort_iter <- unique(dat$mortality) # mortality to iterate over for sensitivity a
 # apply biomass enhancement model to the density distribution to estimate enhancement uncertainty
 # note that densities are provided as meanCount/m2 (average number of individuals/100m2)
 
-n <- 1000 # bump up down the road
+n <- 10000 # bump up down the road
 spp <- unique(dat$species)
 tmp <- list()
 
@@ -39,16 +39,13 @@ for(i in seq_along(mort_iter)){
       if(ind$species[1] != 'Southern squid'){
       if(length(unique(ind$male_female)) > 1){
         indM <- ind %>% filter(male_female == 'M')
-        dens_distM <- sim_truncnorm(n, indM$d, indM$d_se, lower = 0, upper = Inf)
-        if(mean(dens_distM) != indM$d){print(paste0('warning: Male densities are different ', mean(dens_distM) - indM$d))}
-        if(sd(dens_distM) != indM$d_se){print(paste0('warning: Male std. errs are different by ', sd(dens_distM) - indM$d_se))}
-        enhanM <- lapply(dens_distM/2, mod_enhance, spp = indM$species, mf = indM$male_female, m = indM$mortality_val, t_max = indM$t_max, t_0 = indM$t_0, 
+        dens_dist <- sim_truncnorm(n, indM$d, indM$d_se, lower = 0, upper = Inf)
+        if(mean(dens_dist) != indM$d){print(paste0('warning: densities are different ', mean(dens_dist) - indM$d))}
+        if(sd(dens_dist) != indM$d_se){print(paste0('warning: std. errs are different by ', sd(dens_dist) - indM$d_se))}
+        enhanM <- lapply(dens_dist/2, mod_enhance, spp = indM$species, mf = indM$male_female, m = indM$mortality_val, t_max = indM$t_max, t_0 = indM$t_0, 
                          t_harv = indM$t_harv, l_asym = indM$l_asym, Ks = indM$Ks, a = indM$a, b = indM$b, years = num_years)
         indF <- ind %>% filter(male_female == 'F')
-        dens_distF <- sim_truncnorm(n, indF$d, indF$d_se, lower = 0, upper = Inf)
-        if(mean(dens_distF) != indF$d){print(paste0('warning: Female densities are different ', mean(dens_distF) - indF$d))}
-        if(sd(dens_distF) != indF$d_se){print(paste0('warning: Female std. errs are different by ', sd(dens_distF) - indF$d_se))}
-        enhanF <- lapply(dens_distF/2, mod_enhance, spp = indF$species, mf = indF$male_female, m = indF$mortality_val, t_max = indF$t_max, t_0 = indF$t_0, 
+        enhanF <- lapply(dens_dist/2, mod_enhance, spp = indF$species, mf = indF$male_female, m = indF$mortality_val, t_max = indF$t_max, t_0 = indF$t_0, 
                          t_harv = indF$t_harv, l_asym = indF$l_asym, Ks = indF$Ks, a = indF$a, b = indF$b, years = num_years)
         tmp3[[k]] <- rbind(data.frame(sim = rep(1:n, each = num_years+1), site = indM$d_site, do.call(rbind, enhanM)), data.frame(sim = rep(1:n, each = num_years+1), site = indF$d_site, do.call(rbind, enhanF)))
       }else{
@@ -61,16 +58,13 @@ for(i in seq_along(mort_iter)){
       }
       }else{
         indM <- ind %>% filter(male_female == 'M')
-        dens_distM <- sim_truncnorm(n, indM$d, indM$d_se, lower = 0, upper = Inf)
-        if(mean(dens_distM) != indM$d){print(paste0('warning: Male densities are different ', mean(dens_distM) - indM$d))}
-        if(sd(dens_distM) != indM$d_se){print(paste0('warning: Male std. errs are different by ', sd(dens_distM) - indM$d_se))}
-        enhanM <- lapply(dens_distM/2, mod_enhance_squid, spp = indM$species, mf = indM$male_female, m = indM$mortality_val, t_max = indM$t_max, t_0 = indM$t_0, 
+        dens_dist <- sim_truncnorm(n, indM$d, indM$d_se, lower = 0, upper = Inf)
+        if(mean(dens_dist) != indM$d){print(paste0('warning: densities are different ', mean(dens_dist) - indM$d))}
+        if(sd(dens_dist) != indM$d_se){print(paste0('warning: std. errs are different by ', sd(dens_dist) - indM$d_se))}
+        enhanM <- lapply(dens_dist/2, mod_enhance_squid, spp = indM$species, mf = indM$male_female, m = indM$mortality_val, t_max = indM$t_max, t_0 = indM$t_0, 
                          t_harv = indM$t_harv, l_asym = indM$l_asym, Ks = indM$Ks, years = num_years, weight_max = indM$weight_max)
         indF <- ind %>% filter(male_female == 'F')
-        dens_distF <- sim_truncnorm(n, indF$d, indF$d_se, lower = 0, upper = Inf)
-        if(mean(dens_distF) != indF$d){print(paste0('warning: Female densities are different ', mean(dens_distF) - indF$d))}
-        if(sd(dens_distF) != indF$d_se){print(paste0('warning: Female std. errs are different by ', sd(dens_distF) - indF$d_se))}
-        enhanF <- lapply(dens_distF/2, mod_enhance_squid, spp = indF$species, mf = indF$male_female, m = indF$mortality_val, t_max = indF$t_max, t_0 = indF$t_0, 
+        enhanF <- lapply(dens_dist/2, mod_enhance_squid, spp = indF$species, mf = indF$male_female, m = indF$mortality_val, t_max = indF$t_max, t_0 = indF$t_0, 
                          t_harv = indF$t_harv, l_asym = indF$l_asym, Ks = indF$Ks, years = num_years, weight_max = indF$weight_max)
         tmp3[[k]] <- rbind(data.frame(sim = rep(1:n, each = num_years+1), site = indM$d_site, do.call(rbind, enhanM)), data.frame(sim = rep(1:n, each = num_years+1), site = indF$d_site, do.call(rbind, enhanF)))
       }
