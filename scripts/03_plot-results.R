@@ -27,7 +27,6 @@ dat2 <- dat %>%
             net_biomass_kg_ha_low = quantile(net_biomass_kg_ha, 0.25, na.rm = T))
 
 # sum biomass at each site, then average across sites
-# pool variance and weight by sample size (i.e., number of species at a site) to get SDs
 
 site_average <- dat2 %>% 
   filter(m == 'm_final') %>% # using selected 'm' values for main results
