@@ -18,7 +18,7 @@ mort_iter <- unique(dat$mortality) # mortality to iterate over for sensitivity a
 # apply biomass enhancement model to the density distribution to estimate enhancement uncertainty
 # note that densities are provided as meanCount/m2 (average number of individuals/100m2)
 
-n <- 10000 # bump up down the road
+n <- 10000
 spp <- unique(dat$species)
 tmp <- list()
 
@@ -32,6 +32,7 @@ for(i in seq_along(mort_iter)){
   tmp2 <- list()
   for(j in seq_along(spp)){
     indspp <- dat2 %>% filter(species == spp[j])
+    if(!is.na(indspp$mortality_val[1])){
     sites <- unique(indspp$d_site)
     tmp3 <- list()
     for(k in seq_along(unique(indspp$d_site))){
@@ -70,8 +71,9 @@ for(i in seq_along(mort_iter)){
       }
     }
     tmp2[[j]] <- do.call(rbind, tmp3)
-  }
+  }else{next}
   tmp[[i]] <- data.frame(m = mort_iter[i], do.call(rbind, tmp2))
+  }
 }
 )
 

@@ -30,7 +30,7 @@ dat2 <- dat %>%
 # pool variance and weight by sample size (i.e., number of species at a site) to get SDs
 
 site_average <- dat2 %>% 
-  filter(m == 'm') %>% # using selected 'm' values for main results
+  filter(m == 'm_final') %>% # using selected 'm' values for main results
   group_by(site, year) %>% # sum biomass and variance at each site across species
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
             net_var = sum(net_biomass_kg_ha_var),
@@ -43,7 +43,7 @@ site_average <- dat2 %>%
 site_average <- data.frame(site = 'Average all locations', site_average)
 
 a <- dat2 %>% 
-  filter(m == 'm') %>% # using selected 'm' values for main results
+  filter(m == 'm_final') %>% # using selected 'm' values for main results
   group_by(site, year) %>% 
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
             net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
@@ -71,7 +71,7 @@ a <- dat2 %>%
 a
 
 a2 <- dat2 %>% 
-  filter(m == 'm') %>% # using selected 'm' values for main results
+  filter(m == 'm_final') %>% # using selected 'm' values for main results
   group_by(harvested, site, year) %>% # total biomass enhancement at each site (harvested vs non-harvested)
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
              net_var = sum(net_biomass_kg_ha_var),
@@ -110,7 +110,7 @@ ggsave('outputs/bioenhancement_Fig2.png', width = 10, height = 3)
 # snapper vs. not snapper
 
 b <- dat2 %>% 
-  filter(m == 'm' & site != 'Glenelg') %>% # using selected 'm' values for main results
+  filter(m == 'm_final' & site != 'Glenelg') %>% # using selected 'm' values for main results
   mutate(snap = ifelse(species == 'Australasian snapper', 'Australasian snapper', 'Other species')) %>% 
   mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
   group_by(snap, site, year) %>% 
@@ -142,23 +142,23 @@ ggsave('outputs/bioenhancement_Fig3A.png', width = 7, height = 3)
 # top 3 species with uncertainty
 
 drom <- dat2 %>%
-  filter(m == 'm') %>% # using selected 'm' values for main results
+  filter(m == 'm_final') %>% # using selected 'm' values for main results
   filter(year == 40 & site == 'Dromana') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
 marg <- dat2 %>%
-  filter(m == 'm') %>% # using selected 'm' values for main results
+  filter(m == 'm_final') %>% # using selected 'm' values for main results
   filter(year == 40 & site == 'Margarets Reef') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
 glen <- dat2 %>%
-  filter(m == 'm') %>% # using selected 'm' values for main results
+  filter(m == 'm_final') %>% # using selected 'm' values for main results
   filter(year == 40 & site == 'Glenelg') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
-dromana <- dat2 %>% filter(m == 'm') %>% filter(site == 'Dromana' & species %in% drom$species[2:4])
-margaret <- dat2 %>% filter(m == 'm') %>% filter(site == 'Margarets Reef' & species %in% marg$species[2:4])
-glenelg <- dat2 %>% filter(m == 'm') %>% filter(site == 'Glenelg' & species %in% glen$species[1:3])
+dromana <- dat2 %>% filter(m == 'm_final') %>% filter(site == 'Dromana' & species %in% drom$species[2:4])
+margaret <- dat2 %>% filter(m == 'm_final') %>% filter(site == 'Margarets Reef' & species %in% marg$species[2:4])
+glenelg <- dat2 %>% filter(m == 'm_final') %>% filter(site == 'Glenelg' & species %in% glen$species[1:3])
 
 b2 <- margaret %>% 
   mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
@@ -222,7 +222,7 @@ b4
 
 b2+b3+b4
 
-ggsave('outputs/bioenhancement_Fig3B.png', width = 9, height = 4.1)
+ggsave('outputs/bioenhancement_Fig3B.png', width = 8.5, height = 4.1)
 
 # combine into one fig
 
@@ -231,8 +231,11 @@ ggsave('outputs/bioenhancement_Fig3B.png', width = 9, height = 4.1)
 
 # plot sensitivity to m, total and species
 
+spp_remove <- read.csv('data/fish-dat.csv') %>% filter(is.na(m)) %>% pull(species) %>% unique()
+
 dat3 <- dat %>% 
-  filter(year == max(dat$year) & site != 'Glenelg' & species %in% c(marg$species[1:4], drom$species[1:4])) %>% # pick max year where all species enhancement will be stable
+  filter(!species %in% spp_remove) %>% # remove species that don't have a literature derived M value 
+  filter(year == max(dat$year) & m != 'm_final' & site != 'Glenelg' & species %in% c(marg$species[1:5], drom$species[1:5])) %>% # pick max year where all species enhancement will be stable
   #mutate(snap = ifelse(species == 'Australasian snapper', 'Australasian snapper', 'Other species')) %>% 
   mutate(site = factor(ifelse(site == 'Margarets Reef', 'Margaret', site), levels = c('Margaret', 'Dromana'))) %>% 
   mutate(m = ifelse(m == 'm', 'M derived from literature', 'M derived from max age')) %>% 
@@ -266,10 +269,10 @@ f <- dat3 %>%
   theme_classic()
 f  
 
-g <- e/f + plot_layout(design = c(area(t = 1, l = 1, b = 1, r = 6),
-                                  area(t = 2, l = 1, b = 2, r = 5)))
+g <- e/f #+ plot_layout(design = c(area(t = 1, l = 1, b = 1, r = 6),
+          #                        area(t = 2, l = 1, b = 2, r = 5)))
 g
 
-ggsave('outputs/mortality-sensitivity.png', width = 12, height = 6)
+ggsave('outputs/mortality-sensitivity.png', width = 11, height = 6)
 
 
