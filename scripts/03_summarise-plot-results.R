@@ -3,7 +3,6 @@
 library(tidyverse)
 library(patchwork)
 library(ggh4x)
-library(ggbeeswarm)
 library(RColorBrewer)
 
 dat <- read.csv('outputs/biomass-enhancement.csv')
@@ -246,10 +245,8 @@ e <- dat3 %>%
   ggplot() +
   aes(x = m, y = net_biomass_kg_ha) +
   geom_jitter(alpha = 0.1, size = 0.2, width = 0.1) +
-  #geom_quasirandom(alpha = 0.1, size = 0.01) +
   geom_violin(fill = 'transparent', col = 'cyan3', linewidth = 1) +
   facet_nested(~site + species, scales = 'free_y', independent = 'y') +
-  #ggtitle('A) All species') +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
   xlab('') +
@@ -261,10 +258,8 @@ f <- dat3 %>%
   ggplot() +
   aes(x = m, y = net_biomass_kg_ha) +
   geom_jitter(alpha = 0.1, size = 0.2, width = 0.1) +
-  #geom_quasirandom(alpha = 0.1, size = 0.01) +
   geom_violin(fill = 'transparent', col = 'cyan3', linewidth = 1) +
   facet_nested(~site + species, scales = 'free_y', independent = 'y') +
-  #ggtitle('A) All species') +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
   xlab('') +

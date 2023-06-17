@@ -1,5 +1,5 @@
-# model biomass enhanced by restored reefs based on juvenile abundance, 
-# incorporating fish density uncertainty, modelled as a truncated normal distribution
+# model biomass enhanced by restored reefs based on juvenile density, 
+# incorporating density uncertainty, modelled as a truncated normal distribution
 # currently assuming a 1:1 M:F ratio and dividing densities by 2
 
 library(msm)
