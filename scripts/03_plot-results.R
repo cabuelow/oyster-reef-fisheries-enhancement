@@ -26,6 +26,10 @@ dat2 <- dat %>%
             net_biomass_kg_ha_upp = quantile(net_biomass_kg_ha, 0.75, na.rm = T),
             net_biomass_kg_ha_low = quantile(net_biomass_kg_ha, 0.25, na.rm = T))
 
+# save each species biomass enhancement at equilibirum
+
+write.csv(filter(dat2, year == max(dat$year) & m == 'm_final'), 'outputs/net-bio-enhancement_equilibrium.csv', row.names = F)
+
 # sum biomass at each site, then average across sites
 
 site_average <- dat2 %>% 
