@@ -2,24 +2,23 @@
 
 library(tidyverse)
 library(patchwork)
+library(ggh4x)
+library(ggbeeswarm)
 library(RColorBrewer)
-
-# calculate mean, standard deviation, upper and lower quartiles of biomass enhancement for each species in each year
 
 dat <- read.csv('outputs/biomass-enhancement.csv')
 dat_param <- read.csv('data/fish-dat.csv') %>% 
   select(species, harvested) %>% distinct() %>% 
   mutate(harvested = recode(harvested, 'y' = 'Harvested species', 'n' = 'Non-harvested species'))
 
-# calculate net biomass enhancement per species at each site across all simulated values
+# calculate net biomass enhancement and uncertainty per species at each site across all simulated values
 
 dat2 <- dat %>% 
   left_join(select(dat_param, species, harvested), by = 'species') %>% 
   mutate(net_biomass_kg_ha = (net_biomass_g_unit_area/100)*10) %>% # unit area is 100m2, so divide by 100 to get g/m2, then multiply by 10 to get kg/ha
-  filter(m == 'm') %>% # using selected 'm' values for main results
-  group_by(sim, species, harvested, site, year) %>% 
+  group_by(m, sim, species, harvested, site, year) %>% 
   summarise(net_biomass_kg_ha = sum(net_biomass_kg_ha)) %>%  # here summing by gender 
-  group_by(species, harvested, site, year) %>% # here summarizing across simulations for each site
+  group_by(m, species, harvested, site, year) %>% # here summarizing across simulations for each site
   summarise(net_biomass_kg_ha_mean = mean(net_biomass_kg_ha, na.rm = T),
             net_biomass_kg_ha_var = var(net_biomass_kg_ha, na.rm = T),
             net_biomass_kg_ha_sd = sd(net_biomass_kg_ha, na.rm = T),
@@ -32,16 +31,20 @@ dat2 <- dat %>%
 # pool variance and weight by sample size (i.e., number of species at a site) to get SDs
 
 site_average <- dat2 %>% 
+  filter(m == 'm') %>% # using selected 'm' values for main results
   group_by(site, year) %>% # sum biomass and variance at each site across species
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
             net_var = sum(net_biomass_kg_ha_var),
             n = n()) %>%
   group_by(year) %>% # average biomass enhancement across sites
+  #summarise(net_enhance = weighted.mean(net_enhance, n),
+   #         net_sd = sqrt(weighted.mean(net_var, n)))
   summarise(net_enhance = mean(net_enhance),
-            net_sd = sqrt(weighted.mean(net_var, n)))
+            net_sd = sqrt(mean(net_var)))
 site_average <- data.frame(site = 'Average all locations', site_average)
 
 a <- dat2 %>% 
+  filter(m == 'm') %>% # using selected 'm' values for main results
   group_by(site, year) %>% 
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
             net_sd = sqrt(sum(net_biomass_kg_ha_var))) %>%
@@ -69,13 +72,16 @@ a <- dat2 %>%
 a
 
 a2 <- dat2 %>% 
-  group_by(harvested, site, year) %>% 
+  filter(m == 'm') %>% # using selected 'm' values for main results
+  group_by(harvested, site, year) %>% # total biomass enhancement at each site (harvested vs non-harvested)
   summarise(net_enhance = sum(net_biomass_kg_ha_mean), 
              net_var = sum(net_biomass_kg_ha_var),
              n = n()) %>%
-  group_by(harvested, year) %>% 
-  summarise(net_enhance = mean(net_enhance), 
-            net_sd = sqrt(weighted.mean(net_var, n))) %>% 
+  group_by(harvested, year) %>% # average across locations
+  #summarise(net_enhance = weighted.mean(net_enhance, n), 
+   #         net_sd = sqrt(weighted.mean(net_var, n))) %>% 
+  summarise(net_enhance = mean(net_enhance),
+            net_sd = sqrt(mean(net_var))) %>% 
   mutate(ymin = net_enhance - net_sd,
          ymax = net_enhance  + net_sd) %>% 
   mutate(ymin = ifelse(ymin <0, 0, ymin), 
@@ -105,7 +111,7 @@ ggsave('outputs/bioenhancement_Fig2.png', width = 10, height = 3)
 # snapper vs. not snapper
 
 b <- dat2 %>% 
-  filter(site != 'Glenelg') %>% 
+  filter(m == 'm' & site != 'Glenelg') %>% # using selected 'm' values for main results
   mutate(snap = ifelse(species == 'Australasian snapper', 'Australasian snapper', 'Other species')) %>% 
   mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
   group_by(snap, site, year) %>% 
@@ -137,20 +143,23 @@ ggsave('outputs/bioenhancement_Fig3A.png', width = 7, height = 3)
 # top 3 species with uncertainty
 
 drom <- dat2 %>%
+  filter(m == 'm') %>% # using selected 'm' values for main results
   filter(year == 40 & site == 'Dromana') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
 marg <- dat2 %>%
+  filter(m == 'm') %>% # using selected 'm' values for main results
   filter(year == 40 & site == 'Margarets Reef') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
 glen <- dat2 %>%
+  filter(m == 'm') %>% # using selected 'm' values for main results
   filter(year == 40 & site == 'Glenelg') %>% 
   arrange(desc(net_biomass_kg_ha_mean))
 
-dromana <- dat2 %>% filter(site == 'Dromana' & species %in% drom$species[2:4])
-margaret <- dat2 %>% filter(site == 'Margarets Reef' & species %in% marg$species[2:4])
-glenelg <- dat2 %>% filter(site == 'Glenelg' & species %in% glen$species[1:3])
+dromana <- dat2 %>% filter(m == 'm') %>% filter(site == 'Dromana' & species %in% drom$species[2:4])
+margaret <- dat2 %>% filter(m == 'm') %>% filter(site == 'Margarets Reef' & species %in% marg$species[2:4])
+glenelg <- dat2 %>% filter(m == 'm') %>% filter(site == 'Glenelg' & species %in% glen$species[1:3])
 
 b2 <- margaret %>% 
   mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
@@ -218,48 +227,54 @@ ggsave('outputs/bioenhancement_Fig3B.png', width = 9, height = 4.1)
 
 # combine into one fig
 
-b/b2+b3+b4+plot_layout(design = c(area(1,1,1,2), area(2,1,2,1), area(2,2,2,2), area(2,3,2,3)))
-ggsave('outputs/bioenhancement_Fig3AB.png', width = 8, height = 7)
+#b/b2+b3+b4+plot_layout(design = c(area(1,1,1,2), area(2,1,2,1), area(2,2,2,2), area(2,3,2,3)))
+#ggsave('outputs/bioenhancement_Fig3AB.png', width = 8, height = 7)
 
 # plot sensitivity to m, total and species
 
-e <- dat %>% 
-  filter(year == 25) %>% # pick max year where all species enm2ncements will be stable
-  group_by(m, sim, species) %>% 
-  summarise(net_biomass_g_m2 = sum(net_biomass_g_m2)) %>% # sum by gender
+dat3 <- dat %>% 
+  filter(year == max(dat$year) & site != 'Glenelg' & species %in% c(marg$species[1:4], drom$species[1:4])) %>% # pick max year where all species enhancement will be stable
+  #mutate(snap = ifelse(species == 'Australasian snapper', 'Australasian snapper', 'Other species')) %>% 
+  mutate(site = factor(ifelse(site == 'Margarets Reef', 'Margaret', site), levels = c('Margaret', 'Dromana'))) %>% 
+  mutate(m = ifelse(m == 'm', 'M derived from literature', 'M derived from max age')) %>% 
+  mutate(net_biomass_kg_ha = (net_biomass_g_unit_area/100)*10) %>% # unit area is 100m2, so divide by 100 to get g/m2, then multiply by 10 to get kg/ha
+  group_by(m, sim, species, site) %>% 
+  summarise(net_biomass_kg_ha = sum(net_biomass_kg_ha)) # here summing by gender 
+
+e <- dat3 %>% 
+  filter(site == 'Margaret') %>% 
   ggplot() +
-  aes(x = m, y = net_biomass_g_m2) +
-  geom_jitter(alpm2 = 0.1, size = 0.2, width = 0.1) +
-  geom_violin(fill = 'transparent', col = 'cyan') +
-  ggtitle('A) All species') +
-  ylab(bquote('Biomass enm2ncement (g ' ~m2^-1~yr^-1*')')) +
+  aes(x = m, y = net_biomass_kg_ha) +
+  geom_jitter(alpha = 0.1, size = 0.2, width = 0.1) +
+  #geom_quasirandom(alpha = 0.1, size = 0.01) +
+  geom_violin(fill = 'transparent', col = 'cyan3', linewidth = 1) +
+  facet_nested(~site + species, scales = 'free_y', independent = 'y') +
+  #ggtitle('A) All species') +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
   xlab('') +
   theme_classic()
 e  
 
-f <- dat %>% 
-  filter(year == 25) %>% # pick max year where all species enm2ncements will be stable
-  group_by(m, sim, species) %>% 
-  summarise(net_biomass_g_m2 = sum(net_biomass_g_m2)) %>% # sum by gender
+f <- dat3 %>% 
+  filter(site == 'Dromana') %>% 
   ggplot() +
-  aes(x = m, y = net_biomass_g_m2) +
-  geom_jitter(alpm2 = 0.1, size = 0.2, width = 0.1) +
-  geom_violin(fill = 'transparent', col = 'cyan') +
-  facet_grid(~species) +
-  ggtitle('B) Individual species') +
-  ylab('') +
-  xlab('')+
+  aes(x = m, y = net_biomass_kg_ha) +
+  geom_jitter(alpha = 0.1, size = 0.2, width = 0.1) +
+  #geom_quasirandom(alpha = 0.1, size = 0.01) +
+  geom_violin(fill = 'transparent', col = 'cyan3', linewidth = 1) +
+  facet_nested(~site + species, scales = 'free_y', independent = 'y') +
+  #ggtitle('A) All species') +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
+  xlab('') +
   theme_classic()
 f  
 
-h <- e+f+plot_layout(widths = c(0.2,1))
-h
+g <- e/f + plot_layout(design = c(area(t = 1, l = 1, b = 1, r = 6),
+                                  area(t = 2, l = 1, b = 2, r = 5)))
+g
 
-ggsave('outputs/bioenm2ncement_mortality-sensitivity.png', width = 12, height = 4)
+ggsave('outputs/mortality-sensitivity.png', width = 12, height = 6)
 
-# plot everything
-
-g/h
-
-ggsave('outputs/bioenm2ncement_plots_all.png', width = 12, height = 8)
 
