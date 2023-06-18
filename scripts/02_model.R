@@ -1,6 +1,4 @@
-# model biomass enhanced by restored reefs based on juvenile density, 
-# incorporating density uncertainty, modelled as a truncated normal distribution
-# currently assuming a 1:1 M:F ratio and dividing densities by 2
+# model biomass enhanced by restored reefs based on juvenile density
 
 library(msm)
 library(tidyverse)
@@ -13,18 +11,18 @@ dat <- read.csv('data/wrangled-dat.csv')
 num_years <- max(dat$t_max) # model through to maximum lifespan of species
 mort_iter <- unique(dat$mortality) # mortality to iterate over for sensitivity analysis
 
-# simulate fish densities from a normal distribution truncated  at 0 (n = 100000)
-# representing sampling distribution of density differences (mean +- std. error)
-# apply biomass enhancement model to the density distribution to estimate enhancement uncertainty
+# simulate fish densities from a normal distribution truncated at 0
+# representing sampling distribution of enhanced juv. density (mean +- std. error)
+# then apply biomass enhancement model to the density distribution to estimate enhancement uncertainty
 # note that densities are provided as meanCount/m2 (average number of individuals/100m2)
+# assuming a 1:1 M:F ratio and dividing densities by 2
 
 n <- 10000
 spp <- unique(dat$species)
 tmp <- list()
 
-# model individual species at each location, 
-# iterating through different mortality estimates for sensitivity analysis
-# and for males vs. females
+# model individual species at each location, plus males vs. females
+# iterate through different mortality estimates for sensitivity analysis
 
 system.time(
 for(i in seq_along(mort_iter)){

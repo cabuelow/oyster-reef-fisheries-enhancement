@@ -39,11 +39,11 @@ site_average <- dat2 %>%
             net_var = sum(net_biomass_kg_ha_var),
             n = n()) %>%
   group_by(year) %>% # average biomass enhancement across sites
-  #summarise(net_enhance = weighted.mean(net_enhance, n),
-   #         net_sd = sqrt(weighted.mean(net_var, n)))
   summarise(net_enhance = mean(net_enhance),
             net_sd = sqrt(mean(net_var)))
 site_average <- data.frame(site = 'Average all locations', site_average)
+
+# plot location and location-average bioenhancement through time
 
 a <- dat2 %>% 
   filter(m == 'm_final') %>% # using selected 'm' values for main results
@@ -73,6 +73,8 @@ a <- dat2 %>%
   #guides(color=guide_legend(nrow=2,byrow=TRUE))
 a
 
+# plot harvested vs. non-harvested sppp bioennhancement through time
+
 a2 <- dat2 %>% 
   filter(m == 'm_final') %>% # using selected 'm' values for main results
   group_by(harvested, site, year) %>% # total biomass enhancement at each site (harvested vs non-harvested)
@@ -80,8 +82,6 @@ a2 <- dat2 %>%
              net_var = sum(net_biomass_kg_ha_var),
              n = n()) %>%
   group_by(harvested, year) %>% # average across locations
-  #summarise(net_enhance = weighted.mean(net_enhance, n), 
-   #         net_sd = sqrt(weighted.mean(net_var, n))) %>% 
   summarise(net_enhance = mean(net_enhance),
             net_sd = sqrt(mean(net_var))) %>% 
   mutate(ymin = net_enhance - net_sd,
@@ -106,11 +106,12 @@ a2 <- dat2 %>%
   #guides(color=guide_legend(nrow=2,byrow=TRUE))
 a2 
 
+# patch together and plot
 a + a2
 
 ggsave('outputs/bioenhancement_Fig2.png', width = 10, height = 3)
 
-# snapper vs. not snapper
+# plot snapper vs. not snapper bioenhancement through time
 
 b <- dat2 %>% 
   filter(m == 'm_final' & site != 'Glenelg') %>% # using selected 'm' values for main results
@@ -142,7 +143,9 @@ b
 
 ggsave('outputs/bioenhancement_Fig3A.png', width = 7, height = 3)
 
-# top 3 species with uncertainty
+# plot top 3 species (- Aus snapper) at each location
+
+# identify top 3 at each site
 
 drom <- dat2 %>%
   filter(m == 'm_final') %>% # using selected 'm' values for main results
@@ -162,6 +165,8 @@ glen <- dat2 %>%
 dromana <- dat2 %>% filter(m == 'm_final') %>% filter(site == 'Dromana' & species %in% drom$species[2:4])
 margaret <- dat2 %>% filter(m == 'm_final') %>% filter(site == 'Margarets Reef' & species %in% marg$species[2:4])
 glenelg <- dat2 %>% filter(m == 'm_final') %>% filter(site == 'Glenelg' & species %in% glen$species[1:3])
+
+# plot
 
 b2 <- margaret %>% 
   mutate(site = ifelse(site == 'Margarets Reef', 'Margaret', site)) %>% 
@@ -223,6 +228,8 @@ b4 <- glenelg %>%
   guides(color=guide_legend(nrow=3,byrow=TRUE))
 b4
 
+# patch together 
+
 b2+b3+b4
 
 ggsave('outputs/bioenhancement_Fig3B.png', width = 8.5, height = 4.1)
@@ -232,14 +239,13 @@ ggsave('outputs/bioenhancement_Fig3B.png', width = 8.5, height = 4.1)
 #b/b2+b3+b4+plot_layout(design = c(area(1,1,1,2), area(2,1,2,1), area(2,2,2,2), area(2,3,2,3)))
 #ggsave('outputs/bioenhancement_Fig3AB.png', width = 8, height = 7)
 
-# plot sensitivity to m, total and species
+# plot sensitivity to m for top 5 species at each location
 
-spp_remove <- read.csv('data/fish-dat.csv') %>% filter(is.na(m)) %>% pull(species) %>% unique()
+spp_remove <- read.csv('data/fish-dat.csv') %>% filter(is.na(m)) %>% pull(species) %>% unique() # remove species that don't have a lit. derived M for comparison
 
 dat3 <- dat %>% 
   filter(!species %in% spp_remove) %>% # remove species that don't have a literature derived M value 
   filter(year == max(dat$year) & m != 'm_final' & site != 'Glenelg' & species %in% c(marg$species[1:5], drom$species[1:5])) %>% # pick max year where all species enhancement will be stable
-  #mutate(snap = ifelse(species == 'Australasian snapper', 'Australasian snapper', 'Other species')) %>% 
   mutate(site = factor(ifelse(site == 'Margarets Reef', 'Margaret', site), levels = c('Margaret', 'Dromana'))) %>% 
   mutate(m = ifelse(m == 'm', 'M derived from literature', 'M derived from max age')) %>% 
   mutate(net_biomass_kg_ha = (net_biomass_g_unit_area/100)*10) %>% # unit area is 100m2, so divide by 100 to get g/m2, then multiply by 10 to get kg/ha

@@ -21,7 +21,6 @@ dat_density <- read.csv('data/juvenile_densities_20230612.csv') %>%
   filter(d > 0) %>% # filter for only positive density enhancements
   mutate(d_std_weighted = sqrt(((densityvar_Reef*n_Reef)+(densityvar_Unstructured*n_Unstructured))/(n_Reef+n_Unstructured))) %>% 
   mutate(d_se = d_std_weighted/sqrt(n_Reef+n_Unstructured)) %>% # calculate standard error via weighted average of variances
-  #mutate(d_se2 = densitystd_Reef/sqrt(n_Reef)) %>% # all of the densities on unstructured are 0, so will just use standard error of reef
   data.frame()
 
 # join to other data frame
