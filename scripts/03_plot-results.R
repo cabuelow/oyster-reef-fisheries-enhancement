@@ -179,7 +179,7 @@ b2 <- margaret %>%
   ylab('') +
   xlab('Year') +
   ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
-  ggtitle('B) Top 3 species by location') +
+  ggtitle('B) Top 3 other species by location') +
   facet_wrap(~site, scales = 'free_y') +
   theme_classic() +
   theme(legend.title = element_blank(),
@@ -232,7 +232,7 @@ b4
 
 b2+b3+b4
 
-ggsave('outputs/bioenhancement_Fig3B.png', width = 8.5, height = 4.1)
+ggsave('outputs/bioenhancement_Fig3B.png', width = 8.6, height = 4.1)
 
 # combine into one fig
 
