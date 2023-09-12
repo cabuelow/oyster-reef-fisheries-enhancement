@@ -19,14 +19,14 @@ dat_density <- read.csv('data/juvenile_densities_20230612.csv') %>%
               values_from = c('densitymean', 'densityvar', 'densitystd', 'n')) %>% 
   mutate(d = densitymean_Reef - densitymean_Unstructured) %>% # calculate density enhancement
   filter(d > 0) %>% # filter for only positive density enhancements
-  mutate(d_std_weighted = sqrt(((densityvar_Reef*n_Reef)+(densityvar_Unstructured*n_Unstructured))/(n_Reef+n_Unstructured))) %>% 
-  mutate(d_se = d_std_weighted/sqrt(n_Reef+n_Unstructured)) %>% # calculate standard error via weighted average of variances
+  mutate(d_sd_weighted = sqrt(((densityvar_Reef*n_Reef)+(densityvar_Unstructured*n_Unstructured))/(n_Reef+n_Unstructured))) %>% 
+  mutate(d_se = d_sd_weighted/sqrt(n_Reef+n_Unstructured)) %>% # calculate standard error via weighted average of variances
   data.frame()
 
 # join to other data frame
 
 dat_final <- dat_density %>% 
-  select(Site, common_name, d, d_se) %>% 
+  select(Site, common_name, d, d_sd_weighted, d_se) %>% 
   rename(d_site = 'Site', species = 'common_name') %>% 
   left_join(dat, by = 'species')
 
