@@ -195,7 +195,7 @@ b3 <- dromana %>%
   geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
                   ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.3) +
   geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species), linewidth = 1) +
-  scale_color_manual(values = c("seagreen3", 'goldenrod2', 'darkslategray4')) +
+  scale_color_manual(values = c("dodgerblue4", 'orangered2', 'darkgreen')) +
   ylab('') +
   xlab('Year') +
   #ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
@@ -215,7 +215,7 @@ b4 <- glenelg %>%
   geom_ribbon(aes(x = year, ymin = net_biomass_kg_ha_mean - net_biomass_kg_ha_sd, 
                   ymax = net_biomass_kg_ha_mean + net_biomass_kg_ha_sd, group = species), fill = "grey", alpha = 0.3) +
   geom_line(aes(x = year, y = net_biomass_kg_ha_mean, col = species), linewidth = 1) +
-  scale_color_manual(values = c("seagreen3", 'goldenrod2', 'darkslategray4')) +
+  scale_color_manual(values = c("orangered2", 'maroon')) +
   ylab('') +
   xlab('Year') +
   #ylab(bquote('Biomass enhancement (kg ' ~ha^-1~yr^-1*')')) +
