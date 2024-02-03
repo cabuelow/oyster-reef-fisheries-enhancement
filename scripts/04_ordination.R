@@ -12,15 +12,14 @@ dat <- read.csv('data/juvenile_densities_multivariate_20240131.csv') %>%
   mutate(Site = ifelse(Site == 'Margarets Reef', 'Margaret', Site)) %>% 
   filter(habitat != 'Seagrass') %>% 
   mutate(habitat = ifelse(habitat %in% c('Edge', 'Flat'), 'Reef', habitat)) %>% 
-  group_by(Site, habitat, class.name, deployment.code) %>% 
-  summarise(density = mean(density)) %>% 
+  select(Site, habitat, class.name, deployment.code, density) %>% 
   pivot_wider(names_from = 'class.name', values_from = 'density') %>% 
-  mutate(across(`Acanthaluteres spilomelanurus`:`Upeneichthys vlamingii`, ~ifelse(is.na(.), 0, .))) %>% 
+  mutate(across(`Chrysophrys auratus`:`Aracana ornata`, ~ifelse(is.na(.), 0, .))) %>% 
   select(where(~ any(. != 0))) %>% # remove spp with no observations (seven)
-  mutate(across(`Acanthaluteres spilomelanurus`:`Upeneichthys vlamingii`, ~ifelse(.>0, 1, .))) %>% # presence-absence
+  mutate(across(`Chrysophrys auratus`:`Aracana ornata`, ~ifelse(.>0, 1, .))) %>% # presence-absence
   select(-c(`Trygonorrhina dumerilii`, `Arripis trutta`, `Sphyraena novaehollandiae`, `Hyporhamphus melanochir`, `Ovalipes australiensis`, `Trachurus novaezelandiae`,`Meuschenia scaber`, `Ophthalmolepis lineolatus`, `Trachinops caudimaculatus`)) %>%  # remove spp occuring in less than 5% of sites
   rowwise() %>%
-  mutate(total = sum(c_across(`Acanthaluteres spilomelanurus`:`Upeneichthys vlamingii`))) %>% 
+  mutate(total = sum(c_across(`Chrysophrys auratus`:`Aracana ornata`))) %>% 
   filter(total > 0) %>% # remove rows without any observations
   select(-total) %>% 
   mutate(Site = as.factor(Site))
