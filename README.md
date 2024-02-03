@@ -12,3 +12,8 @@ This repository provides code to estimate fisheries enhancement from restored oy
  
 03_plot-results.R
  - Plots results
+
+04_ordination.R
+ - nMDS ordination of species presence-absence
+ - Permutational multivariate analysis of variance
+ - Calculate diversity indices
