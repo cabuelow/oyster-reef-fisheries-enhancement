@@ -74,17 +74,9 @@ anova(betadisper(vegdist(dat[,-c(1:3)], 'jaccard'), factor(paste0(dat$habitat,'_
 # have unequal variance so could confound our analysis of variance testing for differences in spp. compositions (PERMANOVA)
 
 # run permanova
-# option 1: sequential terms, try different orders
+# sequential terms, try different orders
 adonis2(dat[,-c(1:3)] ~ Site*habitat, data = dat[,c(1:3)], method = 'jaccard')
 adonis2(dat[,-c(1:3)] ~ habitat*Site, data = dat[,c(1:3)], method = 'jaccard')
-
-# option 2: marginal tests 
-# marginal effect of site, controlling for main and interactive effects
-adonis2(dat[,-c(1:3)] ~ Site + habitat, data = dat[,c(1:3)], method = 'jaccard', by = 'margin')
-# marginal effect of habitat, controlling for main and interactive effects
-adonis2(dat[,-c(1:3)] ~ habitat + Site, data = dat[,c(1:3)], method = 'jaccard', by = 'margin')
-# marginal effect of site by habitat interaction, controlling for main effects
-adonis2(dat[,-c(1:3)] ~ Site*habitat, data = dat[,c(1:3)], method = 'jaccard', by = 'margin')
 
 # diversity indices 
 
