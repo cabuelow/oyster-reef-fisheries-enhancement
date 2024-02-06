@@ -41,7 +41,7 @@ nmds_scores$Location_Habitat <- paste0(dat$Site, '_', dat$habitat)
 
 nmds_species <- data.frame(scores(nmds)$species)
 nmds_species$Label <- row.names(nmds_species)
-
+  
 # plot
 
 a <- ggplot() +
@@ -66,7 +66,6 @@ ggsave('outputs/ordination/nmds.png', width = 5.5, height = 3.5)
 # site and habitat are crossed factors (as opposed to nested) and we want to test for an interaction as well as main effects
 # note that ordering of terms is important, as terms are added sequentially (first to last) using type 2 sums of squares
 # so which term goes into the model first determines how much variation is left to be explained by the next covariate
-# alternatively can use test for the marginal effects of each main and interactive effect after controlling for the effects
 
 # first check for multivariate homogeneity of group dispersions (variances) (multivariate analogue of Levene's test for homogeneity of variance)
 anova(betadisper(vegdist(dat[,-c(1:3)], 'jaccard'), dat$Site))
